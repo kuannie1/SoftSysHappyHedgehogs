@@ -10,7 +10,7 @@ We have been studying C this past few weeks. We have outlined a bunch of topics 
 *3) Demonstrate that you have assembled the resources you need to get started.  One good way to do that is to include an annotated bibliography with a pointer (ayyy) to each resource and a few sentences that describe the content.*
 
 
-We can access all the resources we need for this project, including UNIX Network Programming, and Allen provided a web server exercise that we can refer to. Although much of our resources come from *Head First C* and *ThinkOS*. We think we'll need the UNIX Network Programming book because our project is relevant to networks. 
+We can access all the resources we need for this project, including UNIX Network Programming, and Allen provided a web server exercise that we can refer to. Although much of our resources come from *Head First C* and *ThinkOS*, we think we'll need the UNIX Network Programming book because our project is relevant to networks. 
 
 Since we're writing a library, we came upon [this link](http://www.cs.dartmouth.edu/%7Ecampbell/cs50/buildlib.html) that will help us write libraries for C. 
 
