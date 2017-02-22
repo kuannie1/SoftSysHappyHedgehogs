@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <regex.h>
 
+#define MAX_HEADER_SIZE 101
 
 typedef enum {
 	HEAD, POST, GET, PUT, DELETE, OPTIONS, CONNECT
@@ -30,13 +31,13 @@ typedef struct {
 
 typedef struct {
 	StatusLine status_line;
-	MessageHeader headers[101];
+	MessageHeader headers[MAX_HEADER_SIZE];
 	char * body;
 } Response;
 
 typedef struct {
 	RequestLine request_line;
-	MessageHeader headers[101];
+	MessageHeader headers[MAX_HEADER_SIZE];
 	char * body;
 } Request;
 
