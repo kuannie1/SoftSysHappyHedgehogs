@@ -18,7 +18,7 @@ typedef struct req_startline {
 
 typedef struct status {
 	int code;
-	char * text;
+	char * reason_phrase;
 } status;
 
 typedef struct res_startline {
@@ -26,24 +26,26 @@ typedef struct res_startline {
 	status status_code;
 } res_startline;
 
-
 typedef struct response {
 	res_startline startline;
 	messageheader headers[101];
+	char * body;
 } response;
 
 typedef struct request {
 	req_startline startline;
 	messageheader headers[101];
+	char * body;
 } request;
 
 int main() {
-	request req = {{GET, "/api/testing", "HTTP/1.1"}};
+	request req = {{POST, "/api/helloworld", "HTTP/1.1"}};
 	req.headers[0] = (messageheader) {"Cookie", "chocolate chip"};
 	req.headers[1] = (messageheader) {"Accept", "*/*"};
 
 	response res = {{"HTTP/1.1", {200, "OK"}}};
 	res.headers[0] = (messageheader) {"Content-Type","text/html"};
 	res.headers[1] = (messageheader) {"Server","dankwebsite.com"};
+	res.body = "<h1>Hello World!</h1>";
 	return 0;
 }
