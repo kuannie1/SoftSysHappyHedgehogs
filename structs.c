@@ -56,25 +56,19 @@ int main() {
 	int reti;
 	int i;
 	int j;
+	int shift = 0;
 	size_t nmatch = 2;
 	// regmatch_t pmatch[2];
 	regmatch_t* pmatch = malloc(sizeof(regex_t) * (regex.re_nsub + 1));
 
-	regcomp(&regex, "\\(.*?\r\n\\)", 0);
-	// regcomp(&regex, "\\w*:\\w*", 0);
-	// regcomp(&regex, "\\(test\\)(?:ing)", 0);
-	// reti = regexec(&regex, raw_req, nmatch, pmatch, 0);
-	// printf("a matched substring \"%.*s\" is found at position %d to %d.\n",       
-	//      pmatch[1].rm_eo - pmatch[1].rm_so, &raw_req[pmatch[1].rm_so],  
-	//      pmatch[1].rm_so, pmatch[1].rm_eo - 1);
+	regcomp(&regex, "\\([^\r]*\\)", 0);
 
-	if ((reti = regexec(&regex, raw_req, regex.re_nsub + 1, pmatch, 0))){
-		printf("no match\n");
-	} else {
-		printf("match!\n");
-		// printf("a matched substring \"%.*s\" is found at position %d to %d.\n",       
-		//      pmatch[1].rm_eo - pmatch[1].rm_so, &raw_req[pmatch[1].rm_so],  
-		//      pmatch[1].rm_so, pmatch[1].rm_eo - 1);
+	// if (regexec(&regex, raw_req, regex.re_nsub + 1, pmatch, 0)){
+	// 	printf("no match\n");
+	// } else {
+
+	while (regexec(&regex, raw_req + shift, regex.re_nsub + 1, pmatch, 0) == 0){
+		//TODO get rid of for loop?
 		for(i = 0; i < regex.re_nsub; i++) {
 			printf("match %d from index %d to %d: ", i, pmatch[i].rm_so, pmatch[i].rm_eo);
 			for(j = pmatch[i].rm_so; j < pmatch[i].rm_eo; j++) {
@@ -82,6 +76,7 @@ int main() {
 			}
 			printf("\n");
 		}
+		shift = pmatch[0].rm_eo;
 	}
 	free(pmatch);
 	regfree(&regex);
