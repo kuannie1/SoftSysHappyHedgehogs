@@ -47,13 +47,12 @@ void process_request(process_request_arg arg)
     // Handle an HTTP request
 
     size_t str_size = 100;
+    FILE *client_stream = fdopen(arg.client_socket, "r");
     char *input[str_size];
-    fgets(input, str_size, arg.client_socket); // probably a socket specific function for this
+    fgets(input, str_size,client_stream); // probably a socket specific function for this
     char *output_buffer[str_size];
-    //write to buffer
     (arg.server_logic)(input, output_buffer);
-    //send buffer to socket using send()
-    send(arg.client_socket, output_buffer, str_size, 0);
+    send(client_stream, output_buffer, str_size, 0);
 }
 
 void start_server(void (*server_logic) (char *input, char *response_buffer)){
