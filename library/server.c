@@ -42,16 +42,17 @@ int setup(u_short *port)
     return socket_fd;
 }
 
-void process_request(process_request_arg *arg)
+void* process_request(void *arg)
 {
     // Handle an HTTP request
     size_t str_size = 255;
-    FILE *client_stream = fdopen(arg->client_socket, "r");
+    process_request_arg *request_args = (process_request_arg *) arg;
+    FILE *client_stream = fdopen(request_args->client_socket, "r");
     char input[str_size];
-    fgets(input, str_size, arg->client_socket); // probably a socket specific function for this
+    fgets(input, str_size, client_stream); // probably a socket specific function for this
     char output_buffer[str_size];
-    (arg->server_logic)(input, output_buffer);
-    send(arg->client_socket, output_buffer, str_size, 0);
+    (request_args->server_logic)(input, output_buffer);
+    send(request_args->client_socket, output_buffer, str_size, 0);
 }
 
 void start_server(void (*server_logic) (char *input, char *response_buffer)){
@@ -75,7 +76,7 @@ void start_server(void (*server_logic) (char *input, char *response_buffer)){
             exit_with_error("Error accepting connection.");
         }
 
-        if (pthread_create(&new_thread, NULL, &process_request, &((process_request_arg) {client_socket, server_logic})) != 0) {
+        if (pthread_create(&new_thread, NULL, process_request, &((process_request_arg) {client_socket, server_logic})) != 0) {
             perror("Error creating thread.");
         }
     }
