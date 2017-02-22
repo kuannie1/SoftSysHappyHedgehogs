@@ -8,10 +8,11 @@
 
 #define QUEUE_SIZE 10
 #define PORT 8080
+#define BUFFER_SIZE 1024
 
 typedef struct {
     int client_socket;
-    void (*server_logic) (char *input, char *response_buffer);
+    void (*server_logic) (char *input_buffer, char *output_buffer);
 } process_request_arg;
 
 void exit_with_error(const char *message)
@@ -42,20 +43,27 @@ int setup(u_short *port)
     return socket_fd;
 }
 
-void* process_request(void *arg)
+// Handles an HTTP request
+void *process_request(void *arg)
 {
-    // Handle an HTTP request
-    size_t str_size = 255;
     process_request_arg *request_args = (process_request_arg *) arg;
-    FILE *client_stream = fdopen(request_args->client_socket, "r");
-    char input[str_size];
-    fgets(input, str_size, client_stream); // probably a socket specific function for this
-    char output_buffer[str_size];
-    (request_args->server_logic)(input, output_buffer);
-    send(request_args->client_socket, output_buffer, str_size, 0);
+
+    char input_buffer[BUFFER_SIZE];
+    char output_buffer[BUFFER_SIZE];
+
+    // Retreive the message from the client socket and load into the input buffer
+    int message_length = recv(request_args->client_socket, input_buffer, BUFFER_SIZE, 0);
+
+    // Process the request and send back a response
+    (request_args->server_logic)(input_buffer, output_buffer);
+    send(request_args->client_socket, output_buffer, BUFFER_SIZE, 0);
+    send(request_args->client_socket, "\n", 1, 0);
+
+    close(request_args->client_socket);
 }
 
-void start_server(void (*server_logic) (char *input, char *response_buffer)){
+void start_server(void (*server_logic)(char *, char *))
+{
     int server_socket = -1;
     int client_socket = -1;
     u_short port = PORT;
@@ -68,29 +76,30 @@ void start_server(void (*server_logic) (char *input, char *response_buffer)){
     server_socket = setup(&port);
     printf("HTTP Server running on port %d\n", port);
 
-
-
+    // Main program loop; accepts and handles connections from the queue
     while (true) {
         client_socket = accept(server_socket, (struct sockaddr *) &client_address, &address_len);
         if (client_socket == -1) {
             exit_with_error("Error accepting connection.");
         }
 
-        if (pthread_create(&new_thread, NULL, process_request, &((process_request_arg) {client_socket, server_logic})) != 0) {
+        process_request_arg arg = { client_socket, server_logic };
+
+        if (pthread_create(&new_thread, NULL, process_request, &arg) != 0) {
             perror("Error creating thread.");
         }
     }
-
 }
 
-void random_char(char *input, char *output_buffer){
-    for(int i = 0; i<sizeof(input); i++){
-        output_buffer[i] = input[i] + 1;
+void alphabet_shift_char(char *input_buffer, char *output_buffer)
+{
+    for (int i=0; i<sizeof(input_buffer); i++) {
+        output_buffer[i] = input_buffer[i] + 1;
     }
 }
 
 int main(void)
 {
-    start_server(random_char);
+    start_server(alphabet_shift_char);
     return 0;
 }
