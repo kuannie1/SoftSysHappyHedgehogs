@@ -38,6 +38,10 @@ int setup(u_short *port)
 void process_request(int client_socket)
 {
     // Handle an HTTP request
+
+    //char buffer
+    //write to buffer
+    //send buffer to socket using send()
 }
 
 int main(void)
