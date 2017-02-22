@@ -7,47 +7,47 @@ typedef enum {
 	HEAD, POST, GET, PUT, DELETE, OPTIONS, CONNECT
 } request_type;
 
-typedef struct messageheader {
+typedef struct {
 	char * field_name;
 	char * field_value; //is field_content
-} messageheader;
+} MessageHeader;
 
-typedef struct req_startline {
+typedef struct {
 	request_type req_type;
 	char * url;
 	char * http_ver;
-} req_startline;
+} RequestLine;
 
-typedef struct status {
+typedef struct {
 	int code;
 	char * reason_phrase;
-} status;
+} Status;
 
-typedef struct res_startline {
+typedef struct {
 	char * http_ver;
-	status status_code;
-} res_startline;
+	Status status_code;
+} StatusLine;
 
-typedef struct response {
-	res_startline startline;
-	messageheader headers[101];
+typedef struct {
+	StatusLine status_line;
+	MessageHeader headers[101];
 	char * body;
-} response;
+} Response;
 
-typedef struct request {
-	req_startline startline;
-	messageheader headers[101];
+typedef struct {
+	RequestLine request_line;
+	MessageHeader headers[101];
 	char * body;
-} request;
+} Request;
 
 int main() {
-	request req = {{POST, "/api/helloworld", "HTTP/1.1"}};
-	req.headers[0] = (messageheader) {"Cookie", "chocolate chip"};
-	req.headers[1] = (messageheader) {"Accept", "*/*"};
+	Request req = {{POST, "/api/helloworld", "HTTP/1.1"}};
+	req.headers[0] = (MessageHeader) {"Cookie", "chocolate chip"};
+	req.headers[1] = (MessageHeader) {"Accept", "*/*"};
 
-	response res = {{"HTTP/1.1", {200, "OK"}}};
-	res.headers[0] = (messageheader) {"Content-Type","text/html"};
-	res.headers[1] = (messageheader) {"Server","dankwebsite.com"};
+	Response res = {{"HTTP/1.1", {200, "OK"}}};
+	res.headers[0] = (MessageHeader) {"Content-Type","text/html"};
+	res.headers[1] = (MessageHeader) {"Server","dankwebsite.com"};
 	res.body = "<h1>Hello World!</h1>";
 
 	return 0;
