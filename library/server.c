@@ -3,9 +3,16 @@
 #include <netinet/in.h>
 #include <pthread.h>
 #include <stdbool.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 #define QUEUE_SIZE 10
 #define PORT 8080
+
+typedef struct{
+    int client_socket;
+    void (*server_logic) (char *input, char *response_buffer);
+}process_request_arg;
 
 void exit_with_error(const char *message)
 {
@@ -30,22 +37,26 @@ int setup(u_short *port)
         exit_with_error("Error binding to socket.");
     }
     if (listen(socket_fd, QUEUE_SIZE) < 0) {
-        exit_with_error("Error listening on socket.")
+        exit_with_error("Error listening on socket.");
     }
     return socket_fd;
 }
 
-void process_request(int client_socket)
+void process_request(process_request_arg arg)
 {
     // Handle an HTTP request
 
-    //char buffer
+    size_t str_size = 100;
+    char *input[str_size];
+    fgets(input, str_size, arg.client_socket); // probably a socket specific function for this
+    char *output_buffer[str_size];
     //write to buffer
+    (arg.server_logic)(input, output_buffer);
     //send buffer to socket using send()
+    send(arg.client_socket, output_buffer, str_size, 0);
 }
 
-int main(void)
-{
+void start_server(void (*server_logic) (char *input, char *response_buffer)){
     int server_socket = -1;
     int client_socket = -1;
     u_short port = PORT;
@@ -58,16 +69,29 @@ int main(void)
     server_socket = setup(&port);
     printf("HTTP Server running on port %d\n", port);
 
+
+
     while (true) {
         client_socket = accept(server_socket, (struct sockaddr *) &client_address, &address_len);
         if (client_socket == -1) {
             exit_with_error("Error accepting connection.");
         }
 
-        if (pthread_create(&new_thread, NULL, process_request, client_socket) != 0) {
+        if (pthread_create(&new_thread, NULL, &process_request, &((process_request_arg) {client_socket, server_logic})) != 0) {
             perror("Error creating thread.");
         }
     }
 
+}
+
+void random_char(char *input, char *output_buffer){
+    for(int i = 0; i<sizeof(input); i++){
+        output_buffer[i] = input[i] + 1;
+    }
+}
+
+int main(void)
+{
+    start_server(random_char);
     return 0;
 }
