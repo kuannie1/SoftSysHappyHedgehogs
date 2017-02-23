@@ -1,3 +1,7 @@
+/* Basic HTTP server library
+ * Created February 2017 by Sam Myers, Serena Chen, Anne Ku, and Bill Wong
+ */
+
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -13,7 +17,8 @@
 typedef struct {
     int client_socket;
     void (*server_logic) (char *input_buffer, char *output_buffer);
-} process_request_arg;
+} ProcessRequestArg;
+
 
 void exit_with_error(const char *message)
 {
@@ -46,20 +51,20 @@ int setup(u_short *port)
 // Handles an HTTP request
 void *process_request(void *arg)
 {
-    process_request_arg *request_args = (process_request_arg *) arg;
+    ProcessRequestArg *request_arg = (ProcessRequestArg *) arg;
 
     char input_buffer[BUFFER_SIZE];
     char output_buffer[BUFFER_SIZE];
 
     // Retreive the message from the client socket and load into the input buffer
-    int message_length = recv(request_args->client_socket, input_buffer, BUFFER_SIZE, 0);
+    recv(request_arg->client_socket, input_buffer, BUFFER_SIZE, 0);
 
     // Process the request and send back a response
-    (request_args->server_logic)(input_buffer, output_buffer);
-    send(request_args->client_socket, output_buffer, BUFFER_SIZE, 0);
-    send(request_args->client_socket, "\n", 1, 0);
+    (request_arg->server_logic)(input_buffer, output_buffer);
+    send(request_arg->client_socket, output_buffer, BUFFER_SIZE, 0);
+    send(request_arg->client_socket, "\n", 1, 0);
 
-    close(request_args->client_socket);
+    close(request_arg->client_socket);
 }
 
 void start_server(void (*server_logic)(char *, char *))
@@ -83,7 +88,7 @@ void start_server(void (*server_logic)(char *, char *))
             exit_with_error("Error accepting connection.");
         }
 
-        process_request_arg arg = { client_socket, server_logic };
+        ProcessRequestArg arg = { client_socket, server_logic };
 
         if (pthread_create(&new_thread, NULL, process_request, &arg) != 0) {
             perror("Error creating thread.");
