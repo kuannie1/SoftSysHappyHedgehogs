@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "structs.h"
 
 #define QUEUE_SIZE 10
 #define PORT 8080
