@@ -67,6 +67,15 @@ void *process_request(void *arg)
     close(request_arg->client_socket);
 }
 
+/*
+Main library function that the user will call. Starts the server by opening the
+socket and runs continuously, taking in clients that connect and using the
+passed in server_logic function to process the clients' requests.
+
+server_logic: function supplied by user for server logic. Server logic
+            functions should take in an input string and pack an output buffer.
+Errors may occur is things happen.
+*/
 void start_server(void (*server_logic)(char *, char *))
 {
     int server_socket = -1;
@@ -96,7 +105,13 @@ void start_server(void (*server_logic)(char *, char *))
     }
 }
 
-void alphabet_shift_char(char *input_buffer, char *output_buffer)
+/*
+Shifts all ascii characters of the input string by one, and writes to the output buffer
+
+input_buffer: input string
+output_buffer: output string
+*/
+void caesar_cipher(char *input_buffer, char *output_buffer)
 {
     for (int i=0; i<sizeof(input_buffer); i++) {
         output_buffer[i] = input_buffer[i] + 1;
@@ -105,6 +120,6 @@ void alphabet_shift_char(char *input_buffer, char *output_buffer)
 
 int main(void)
 {
-    start_server(alphabet_shift_char);
+    start_server(caesar_cipher);
     return 0;
 }
