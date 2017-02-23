@@ -19,13 +19,22 @@ typedef struct {
     void (*server_logic) (char *input_buffer, char *output_buffer);
 } ProcessRequestArg;
 
-
+/* Log an error and exit the program.
+ * 
+ * message: a string to write to the console.
+ */
 void exit_with_error(const char *message)
 {
     perror(message);
     exit(1);
 }
 
+/* Creates a socket, binds it to a port, and starts listening.
+ * 
+ * port: a pointer to the value of the port to listen on.
+ * 
+ * return: the file descriptor of the server socket.
+ */
 int setup(u_short *port)
 {
     int socket_fd = 0;
@@ -48,7 +57,10 @@ int setup(u_short *port)
     return socket_fd;
 }
 
-// Handles an HTTP request
+/* Handles an HTTP request, then closes the connection.
+ *
+ * arg: a pointer to a ProcessRequestArg with information about how to handle the request
+ */
 void *process_request(void *arg)
 {
     ProcessRequestArg *request_arg = (ProcessRequestArg *) arg;
@@ -68,14 +80,14 @@ void *process_request(void *arg)
 }
 
 /*
-Main library function that the user will call. Starts the server by opening the
-socket and runs continuously, taking in clients that connect and using the
-passed in server_logic function to process the clients' requests.
-
-server_logic: function supplied by user for server logic. Server logic
-            functions should take in an input string and pack an output buffer.
-Errors may occur is things happen.
-*/
+ * Main library function that the user will call. Starts the server by opening the
+ * socket and runs continuously, taking in clients that connect and using the
+ * passed in server_logic function to process the clients' requests.
+ *
+ * server_logic: function supplied by user for server logic. Server logic
+ *          functions should take in an input string and pack an output buffer.
+ * Errors may occur is things happen.
+ */
 void start_server(void (*server_logic)(char *, char *))
 {
     int server_socket = -1;
@@ -106,11 +118,11 @@ void start_server(void (*server_logic)(char *, char *))
 }
 
 /*
-Shifts all ascii characters of the input string by one, and writes to the output buffer
-
-input_buffer: input string
-output_buffer: output string
-*/
+ * Shifts all ascii characters of the input string by one, and writes to the output buffer
+ *
+ * input_buffer: input string
+ * output_buffer: output string
+ */
 void caesar_cipher(char *input_buffer, char *output_buffer)
 {
     for (int i=0; i<sizeof(input_buffer); i++) {
@@ -118,8 +130,18 @@ void caesar_cipher(char *input_buffer, char *output_buffer)
     }
 }
 
+/* Writes a super basic 200 response with an HTML page to the buffer.
+ *
+ * input_buffer: input string
+ * output_buffer: output string
+ */
+void write_html_page(char *input_buffer, char *output_buffer)
+{
+    sprintf(output_buffer, "HTTP/1.0 200 OK\r\n\r\n<body>Sup</body>\r\n");
+}
+
 int main(void)
 {
-    start_server(caesar_cipher);
+    start_server(write_html_page);
     return 0;
 }
