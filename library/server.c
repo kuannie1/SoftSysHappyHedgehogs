@@ -9,6 +9,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include "structs.h"
 
 #define QUEUE_SIZE 10
 #define PORT 8080
@@ -20,7 +22,7 @@ typedef struct {
 } ProcessRequestArg;
 
 /* Log an error and exit the program.
- * 
+ *
  * message: a string to write to the console.
  */
 void exit_with_error(const char *message)
@@ -30,9 +32,9 @@ void exit_with_error(const char *message)
 }
 
 /* Creates a socket, binds it to a port, and starts listening.
- * 
+ *
  * port: a pointer to the value of the port to listen on.
- * 
+ *
  * return: the file descriptor of the server socket.
  */
 int setup(u_short *port)
@@ -115,6 +117,24 @@ void start_server(void (*server_logic)(char *, char *))
             perror("Error creating thread.");
         }
     }
+}
+
+void response_struct_to_str(Response *res, char *output_buffer)
+{
+    char all_headers_str[BUFFER_SIZE];
+    for(int i = 0; i < sizeof(res->headers); i++){
+        header = res->headers[i];
+        char *header_str[BUFFER_SIZE];
+        sprintf(header_str, "%s: %s", header->field_name, header->field_value);
+        strcat(all_headers_str, header_str);
+    }
+    StatusLine status_line = res->status_line;
+    sprintf(output_buffer, "%s %i %s\r\n%s\r\n%s\r\n",
+                                            status_line->http_ver,
+                                            status_line->status_code->code,
+                                            status_line->status_code->reason_phrase,
+                                            all_headers_str,
+                                            res->body);
 }
 
 /*
