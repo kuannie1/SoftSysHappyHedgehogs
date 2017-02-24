@@ -15,7 +15,7 @@
 
 #define QUEUE_SIZE 10
 #define PORT 8080
-#define BUFFER_SIZE 4096
+#define BUFFER_SIZE 20000
 
 typedef struct {
     int client_socket;
@@ -64,7 +64,7 @@ void response_struct_to_str(Response *res, char *output_buffer)
 {
     size_t num_headers = sizeof(res->headers);
     char all_headers_str[BUFFER_SIZE];
-    for(int i = 0; i < num_headers; i++){
+    for (int i = 0; i < num_headers; i++) {
         MessageHeader header = res->headers[i];
         char header_str[BUFFER_SIZE];
         sprintf(header_str, "%s: %s", header.field_name, header.field_value);
@@ -152,6 +152,7 @@ void start_server(Response * (*server_logic)(char *))
  */
 Response *caesar_cipher(char *input_buffer)
 {
+    printf(input_buffer);
     char caesar[sizeof(input_buffer)];
     for (int i=0; i<sizeof(input_buffer); i++) {
         caesar[i] = input_buffer[i] + 1;

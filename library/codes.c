@@ -24,10 +24,10 @@ const char *phrases[NUM_CODES] = {
 
 int get_reason_phrase(int status_code, char *phrase)
 {
-    size_t i = -1;
+    int i = -1;
     while (i < NUM_CODES && status_code != codes[i]) i++;
 
-    if (i < NUM_CODES) {
+    if (i >= NUM_CODES) {
         return -1;
     } else {
         sprintf(phrase, "%s", phrases[i]);
