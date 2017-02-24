@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <regex.h>
+#include <string.h>
 #include "structs.h"
+
+regex_t regex;
 
 Request * make_request(char * raw_req) {
   int reti;
@@ -16,19 +19,15 @@ Request * make_request(char * raw_req) {
   while (regexec(&regex, raw_req, regex.re_nsub + 1, pmatch, 0) == 0){
     int start = pmatch[0].rm_so;
     int end = pmatch[0].rm_eo;
-    char * match[end - start];
+    int len = end - start;
+    char match[len];
 
-    printf("match from index %d to %d: ", start, end);
-    memcpy(match, raw_req + start, end - start);
-    printf("%s\n", match);
+    memcpy(match, raw_req + start, len);
+    match[len] = '\0';
 
-    // Print the match char-by-char
-    // for(j = pmatch[0].rm_so; j < pmatch[0].rm_eo; j++) {
-    //  printf("%c", raw_req[j]);
-    // }
-    // r.startline = current_match;
-    printf("\n");
-    raw_req = raw_req + pmatch[0].rm_eo;
+    printf("match from index %d to %d: \"%s\"\n", start, end, match);
+
+    raw_req = raw_req + end;
     lineNum++;
   }
   free(pmatch);
@@ -37,19 +36,7 @@ Request * make_request(char * raw_req) {
 }
 
 int main() {
-  // request req = {{POST, "/api/helloworld", "HTTP/1.1"}};
-  // req.headers[0] = (messageheader) {"Cookie", "chocolate chip"};
-  // req.headers[1] = (messageheader) {"Accept", "*/*"};
-
-  // response res = {{"HTTP/1.1", {200, "OK"}}};
-  // res.headers[0] = (messageheader) {"Content-Type","text/html"};
-  // res.headers[1] = (messageheader) {"Server","dankwebsite.com"};
-  // res.body = "<h1>Hello World!</h1>";
-
-
   char * raw_req = "GET /api/testing HTTP/1.1\r\nCookie:chocolate chip\r\nAccept:*/*";
-
-  request *req = make_request(raw_req);
-
+  Request *req = make_request(raw_req);
   return 0;
 }
