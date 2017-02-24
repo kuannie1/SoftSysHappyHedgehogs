@@ -14,7 +14,7 @@
 
 #define QUEUE_SIZE 10
 #define PORT 8080
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 4096
 
 typedef struct {
     int client_socket;
@@ -170,9 +170,7 @@ Response *write_html_page(char *input_buffer)
     char phrase[80];
     get_reason_phrase(code, phrase);
 
-    sprintf(output_buffer, "HTTP/1.0 %i %s\r\n\r\n<body>Sup</body>\r\n", code, phrase);
-
-    Response *res = build_response(200, "Sup");
+    Response *res = build_response(200, "<body>Sup</body>\r\n");
     return res;
 }
 
