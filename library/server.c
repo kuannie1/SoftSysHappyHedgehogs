@@ -18,7 +18,7 @@
 
 typedef struct {
     int client_socket;
-    void (*server_logic) (char *input_buffer, char *output_buffer);
+    Response * (*server_logic) (char *input_buffer);
 } ProcessRequestArg;
 
 /* Log an error and exit the program.
@@ -73,8 +73,11 @@ void *process_request(void *arg)
     // Retreive the message from the client socket and load into the input buffer
     recv(request_arg->client_socket, input_buffer, BUFFER_SIZE, 0);
 
-    // Process the request and send back a response
-    (request_arg->server_logic)(input_buffer, output_buffer);
+    // Process the request
+    Response *res = (request_arg->server_logic)(input_buffer, output_buffer);
+    response_struct_to_str(res, output_buffer);
+
+    // Send back a response
     send(request_arg->client_socket, output_buffer, BUFFER_SIZE, 0);
     send(request_arg->client_socket, "\n", 1, 0);
 
@@ -90,7 +93,7 @@ void *process_request(void *arg)
  *          functions should take in an input string and pack an output buffer.
  * Errors may occur is things happen.
  */
-void start_server(void (*server_logic)(char *, char *))
+void start_server(Response * (*server_logic)(char *))
 {
     int server_socket = -1;
     int client_socket = -1;
@@ -137,17 +140,23 @@ void response_struct_to_str(Response *res, char *output_buffer)
                                             res->body);
 }
 
+/**
+
+TODO: Change these to return responses
+*/
 /*
  * Shifts all ascii characters of the input string by one, and writes to the output buffer
  *
  * input_buffer: input string
  * output_buffer: output string
  */
-void caesar_cipher(char *input_buffer, char *output_buffer)
+Response *caesar_cipher(char *input_buffer)
 {
+    char caesar[sizeof(input_buffer)];
     for (int i=0; i<sizeof(input_buffer); i++) {
-        output_buffer[i] = input_buffer[i] + 1;
+        caesar[i] = input_buffer[i] + 1;
     }
+
 }
 
 /* Writes a super basic 200 response with an HTML page to the buffer.
@@ -155,7 +164,7 @@ void caesar_cipher(char *input_buffer, char *output_buffer)
  * input_buffer: input string
  * output_buffer: output string
  */
-void write_html_page(char *input_buffer, char *output_buffer)
+Response *write_html_page(char *input_buffer)
 {
     sprintf(output_buffer, "HTTP/1.0 200 OK\r\n\r\n<body>Sup</body>\r\n");
 }
