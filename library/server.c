@@ -94,7 +94,7 @@ void *process_request(void *arg)
     recv(request_arg->client_socket, input_buffer, BUFFER_SIZE, 0);
 
     // Process the request
-    Response *res = request_arg->server_logic(input_buffer);
+    Response *res = (request_arg->server_logic)(input_buffer);
     response_struct_to_str(res, output_buffer);
 
     // Send back a response
@@ -167,9 +167,16 @@ Response *caesar_cipher(char *input_buffer)
  */
 Response *write_html_page(char *input_buffer)
 {
+    int code = 200;
+    char phrase[80];
+    get_reason_phrase(code, phrase);
+
+    sprintf(output_buffer, "HTTP/1.0 %i %s\r\n\r\n<body>Sup</body>\r\n", code, phrase);
+
     Response *res = build_response(200, "Sup");
     return res;
 }
+
 int main(void)
 {
     start_server(write_html_page);
