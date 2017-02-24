@@ -18,11 +18,11 @@
 
 typedef struct {
     int client_socket;
-    void (*server_logic) (char *input_buffer, char *output_buffer);
+    Response * (*server_logic) (char *input_buffer);
 } ProcessRequestArg;
 
 /* Log an error and exit the program.
- * 
+ *
  * message: a string to write to the console.
  */
 void exit_with_error(const char *message)
@@ -32,9 +32,9 @@ void exit_with_error(const char *message)
 }
 
 /* Creates a socket, binds it to a port, and starts listening.
- * 
+ *
  * port: a pointer to the value of the port to listen on.
- * 
+ *
  * return: the file descriptor of the server socket.
  */
 int setup(u_short *port)
@@ -59,6 +59,25 @@ int setup(u_short *port)
     return socket_fd;
 }
 
+void response_struct_to_str(Response *res, char *output_buffer)
+{
+    size_t num_headers = sizeof(res->headers);
+    char all_headers_str[BUFFER_SIZE];
+    for(int i = 0; i < num_headers; i++){
+        MessageHeader header = res->headers[i];
+        char *header_str[BUFFER_SIZE];
+        sprintf(header_str, "%s: %s", header.field_name, header.field_value);
+        strcat(all_headers_str, header_str);
+    }
+    // StatusLine status_line = res->status_line;
+    sprintf(output_buffer, "%s %i %s\r\n%s\r\n%s\r\n",
+                                            res->status_line->http_ver,
+                                            res->status_line->status->code,
+                                            res->status_line->status->reason_phrase,
+                                            all_headers_str,
+                                            res->body);
+}
+
 /* Handles an HTTP request, then closes the connection.
  *
  * arg: a pointer to a ProcessRequestArg with information about how to handle the request
@@ -72,9 +91,12 @@ void *process_request(void *arg)
 
     // Retreive the message from the client socket and load into the input buffer
     recv(request_arg->client_socket, input_buffer, BUFFER_SIZE, 0);
-    printf(input_buffer);
-    // Process the request and send back a response
-    (request_arg->server_logic)(input_buffer, output_buffer);
+
+    // Process the request
+    Response *res = (request_arg->server_logic)(input_buffer);
+    response_struct_to_str(res, output_buffer);
+
+    // Send back a response
     send(request_arg->client_socket, output_buffer, BUFFER_SIZE, 0);
     send(request_arg->client_socket, "\n", 1, 0);
 
@@ -90,7 +112,7 @@ void *process_request(void *arg)
  *          functions should take in an input string and pack an output buffer.
  * Errors may occur is things happen.
  */
-void start_server(void (*server_logic)(char *, char *))
+void start_server(Response * (*server_logic)(char *))
 {
     int server_socket = -1;
     int client_socket = -1;
@@ -123,27 +145,35 @@ void start_server(void (*server_logic)(char *, char *))
  * Shifts all ascii characters of the input string by one, and writes to the output buffer
  *
  * input_buffer: input string
- * output_buffer: output string
+ *
+ * return: pointer to Response struct with the cipher as the body
  */
-void caesar_cipher(char *input_buffer, char *output_buffer)
+Response *caesar_cipher(char *input_buffer)
 {
+    char caesar[sizeof(input_buffer)];
     for (int i=0; i<sizeof(input_buffer); i++) {
-        output_buffer[i] = input_buffer[i] + 1;
+        caesar[i] = input_buffer[i] + 1;
     }
+    Response *res = build_response(200, caesar);
+    return res;
 }
 
 /* Writes a super basic 200 response with an HTML page to the buffer.
  *
  * input_buffer: input string
- * output_buffer: output string
+ *
+ * return: pointer to Response struct with "Sup" as the body
  */
-void write_html_page(char *input_buffer, char *output_buffer)
+Response *write_html_page(char *input_buffer)
 {
     int code = 200;
     char phrase[80];
     get_reason_phrase(code, phrase);
 
     sprintf(output_buffer, "HTTP/1.0 %i %s\r\n\r\n<body>Sup</body>\r\n", code, phrase);
+
+    Response *res = build_response(200, "Sup");
+    return res;
 }
 
 int main(void)
