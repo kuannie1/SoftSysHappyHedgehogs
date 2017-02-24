@@ -1,5 +1,5 @@
 server: server.o structs.o codes.o
-	gcc server.o structs.o codes.o -o server
+	gcc -pthread server.o structs.o codes.o -o server
 
 structs.o: structs.c structs.h codes.h
 	gcc -c structs.c
