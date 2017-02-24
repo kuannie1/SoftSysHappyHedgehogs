@@ -40,4 +40,6 @@ typedef struct {
 	char *body;
 } Request;
 
+Response *build_response(int status_code, char *body);
+
 #endif

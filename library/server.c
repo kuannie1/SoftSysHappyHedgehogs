@@ -59,6 +59,25 @@ int setup(u_short *port)
     return socket_fd;
 }
 
+void response_struct_to_str(Response *res, char *output_buffer)
+{
+    size_t num_headers = sizeof(res->headers);
+    char all_headers_str[BUFFER_SIZE];
+    for(int i = 0; i < num_headers; i++){
+        MessageHeader header = res->headers[i];
+        char *header_str[BUFFER_SIZE];
+        sprintf(header_str, "%s: %s", header.field_name, header.field_value);
+        strcat(all_headers_str, header_str);
+    }
+    // StatusLine status_line = res->status_line;
+    sprintf(output_buffer, "%s %i %s\r\n%s\r\n%s\r\n",
+                                            res->status_line->http_ver,
+                                            res->status_line->status->code,
+                                            res->status_line->status->reason_phrase,
+                                            all_headers_str,
+                                            res->body);
+}
+
 /* Handles an HTTP request, then closes the connection.
  *
  * arg: a pointer to a ProcessRequestArg with information about how to handle the request
@@ -74,7 +93,7 @@ void *process_request(void *arg)
     recv(request_arg->client_socket, input_buffer, BUFFER_SIZE, 0);
 
     // Process the request
-    Response *res = (request_arg->server_logic)(input_buffer, output_buffer);
+    Response *res = request_arg->server_logic(input_buffer);
     response_struct_to_str(res, output_buffer);
 
     // Send back a response
@@ -122,33 +141,12 @@ void start_server(Response * (*server_logic)(char *))
     }
 }
 
-void response_struct_to_str(Response *res, char *output_buffer)
-{
-    char all_headers_str[BUFFER_SIZE];
-    for(int i = 0; i < sizeof(res->headers); i++){
-        header = res->headers[i];
-        char *header_str[BUFFER_SIZE];
-        sprintf(header_str, "%s: %s", header->field_name, header->field_value);
-        strcat(all_headers_str, header_str);
-    }
-    StatusLine status_line = res->status_line;
-    sprintf(output_buffer, "%s %i %s\r\n%s\r\n%s\r\n",
-                                            status_line->http_ver,
-                                            status_line->status_code->code,
-                                            status_line->status_code->reason_phrase,
-                                            all_headers_str,
-                                            res->body);
-}
-
-/**
-
-TODO: Change these to return responses
-*/
 /*
  * Shifts all ascii characters of the input string by one, and writes to the output buffer
  *
  * input_buffer: input string
- * output_buffer: output string
+ *
+ * return: pointer to Response struct with the cipher as the body
  */
 Response *caesar_cipher(char *input_buffer)
 {
@@ -156,19 +154,21 @@ Response *caesar_cipher(char *input_buffer)
     for (int i=0; i<sizeof(input_buffer); i++) {
         caesar[i] = input_buffer[i] + 1;
     }
-
+    Response *res = build_response(200, caesar);
+    return res;
 }
 
 /* Writes a super basic 200 response with an HTML page to the buffer.
  *
  * input_buffer: input string
- * output_buffer: output string
+ *
+ * return: pointer to Response struct with "Sup" as the body
  */
 Response *write_html_page(char *input_buffer)
 {
-    sprintf(output_buffer, "HTTP/1.0 200 OK\r\n\r\n<body>Sup</body>\r\n");
+    Response *res = build_response(200, "Sup");
+    return res;
 }
-
 int main(void)
 {
     start_server(write_html_page);

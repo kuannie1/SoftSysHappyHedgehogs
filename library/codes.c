@@ -1,8 +1,6 @@
 #include <string.h>
 #include "codes.h"
 
-#define NUM_CODES 7
-
 int codes[NUM_CODES] = {
     100,
     200,
