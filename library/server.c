@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "structs.h"
 
 #define QUEUE_SIZE 10
@@ -71,7 +72,7 @@ void *process_request(void *arg)
 
     // Retreive the message from the client socket and load into the input buffer
     recv(request_arg->client_socket, input_buffer, BUFFER_SIZE, 0);
-
+    printf(input_buffer);
     // Process the request and send back a response
     (request_arg->server_logic)(input_buffer, output_buffer);
     send(request_arg->client_socket, output_buffer, BUFFER_SIZE, 0);
@@ -138,7 +139,11 @@ void caesar_cipher(char *input_buffer, char *output_buffer)
  */
 void write_html_page(char *input_buffer, char *output_buffer)
 {
-    sprintf(output_buffer, "HTTP/1.0 200 OK\r\n\r\n<body>Sup</body>\r\n");
+    int code = 200;
+    char phrase[80];
+    get_reason_phrase(code, phrase);
+
+    sprintf(output_buffer, "HTTP/1.0 %i %s\r\n\r\n<body>Sup</body>\r\n", code, phrase);
 }
 
 int main(void)
