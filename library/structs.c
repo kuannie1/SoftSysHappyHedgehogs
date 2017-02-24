@@ -9,9 +9,13 @@ Response *build_response(int status_code, char *body)
 	Response *response = malloc(sizeof(Response));
 	char reason_phrase[REASON_BUFFER_SIZE];
 	get_reason_phrase(status_code, reason_phrase);
-	const Status status = {status_code, reason_phrase};
-	const StatusLine status_line = {"HTTP/1.1", &status};
-	response->status_line = &status_line;
+	Status *status = malloc(sizeof(Status));
+	status->code = status_code;
+	status->reason_phrase = reason_phrase;
+	StatusLine *status_line = malloc(sizeof(StatusLine));
+	status_line->http_ver = "HTTP/1.1";
+	status_line->status = status;
+	response->status_line = status_line;
 	response->body = body;
 	return response;
 }
