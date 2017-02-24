@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdio.h>
 #include "codes.h"
 
 int codes[NUM_CODES] = {
@@ -29,7 +30,7 @@ int get_reason_phrase(int status_code, char *phrase)
     if (i < NUM_CODES) {
         return -1;
     } else {
-        sprintf(phrase, phrases[i]);
+        sprintf(phrase, "%s", phrases[i]);
         return 0;
     }
 }

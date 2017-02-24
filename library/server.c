@@ -6,6 +6,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <pthread.h>
+#include <unistd.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -65,7 +66,7 @@ void response_struct_to_str(Response *res, char *output_buffer)
     char all_headers_str[BUFFER_SIZE];
     for(int i = 0; i < num_headers; i++){
         MessageHeader header = res->headers[i];
-        char *header_str[BUFFER_SIZE];
+        char header_str[BUFFER_SIZE];
         sprintf(header_str, "%s: %s", header.field_name, header.field_value);
         strcat(all_headers_str, header_str);
     }
