@@ -8,36 +8,36 @@ typedef enum {
 } request_type;
 
 typedef struct {
-	char * field_name;
-	char * field_value; //is field_content
+	char *field_name;
+	char *field_value; //is field_content
 } MessageHeader;
 
 typedef struct {
 	request_type req_type;
-	char * url;
-	char * http_ver;
+	char *url;
+	char *http_ver;
 } RequestLine;
 
 typedef struct {
 	int code;
-	char * reason_phrase;
+	char *reason_phrase;
 } Status;
 
 typedef struct {
-	char * http_ver;
-	Status status_code;
+	char *http_ver;
+	Status *status;
 } StatusLine;
 
 typedef struct {
-	StatusLine status_line;
+	StatusLine *status_line;
 	MessageHeader headers[MAX_HEADER_SIZE];
-	char * body;
+	char *body;
 } Response;
 
 typedef struct {
-	RequestLine request_line;
+	RequestLine *request_line;
 	MessageHeader headers[MAX_HEADER_SIZE];
-	char * body;
+	char *body;
 } Request;
 
 #endif
