@@ -44,6 +44,8 @@ int setup(u_short *port)
     struct sockaddr_in address = { 0 };
 
     socket_fd = socket(PF_INET, SOCK_STREAM, 0);
+    int reset = 1;
+    setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, (char*)&reset, sizeof(reset));
     if (socket_fd == -1) {
         exit_with_error("Error creating socket.");
     }
@@ -62,7 +64,7 @@ int setup(u_short *port)
 
 void response_struct_to_str(Response *res, char *output_buffer)
 {
-    size_t num_headers = sizeof(res->headers);
+    int num_headers = res->num_headers;
     char all_headers_str[BUFFER_SIZE];
     for (int i = 0; i < num_headers; i++) {
         MessageHeader header = res->headers[i];
@@ -89,6 +91,7 @@ void *process_request(void *arg)
 
     char input_buffer[BUFFER_SIZE];
     char output_buffer[BUFFER_SIZE];
+    memset(&output_buffer, 0, BUFFER_SIZE);
 
     // Retreive the message from the client socket and load into the input buffer
     recv(request_arg->client_socket, input_buffer, BUFFER_SIZE, 0);

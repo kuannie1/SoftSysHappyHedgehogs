@@ -13,9 +13,10 @@ Response *build_response(int status_code, char *body)
     status->code = status_code;
     status->reason_phrase = reason_phrase;
     StatusLine *status_line = malloc(sizeof(StatusLine));
-    status_line->http_ver = "HTTP/1.1";
+    status_line->http_ver = "HTTP/1.0";
     status_line->status = status;
     response->status_line = status_line;
+    response->num_headers = 0;
     response->body = body;
     return response;
 }

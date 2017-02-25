@@ -31,6 +31,7 @@ typedef struct {
 typedef struct {
 	StatusLine *status_line;
 	MessageHeader headers[MAX_HEADER_SIZE];
+	int num_headers;
 	char *body;
 } Response;
 
