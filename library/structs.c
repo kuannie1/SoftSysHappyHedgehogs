@@ -4,20 +4,22 @@
 #include "structs.h"
 #include "codes.h"
 
+#define HTTP_VERSION "HTTP/1.0"
+
 Response *build_response(int status_code, char *body)
 {
-    Response *response = malloc(sizeof(Response));
     char reason_phrase[REASON_BUFFER_SIZE];
     get_reason_phrase(status_code, reason_phrase);
+
     Status *status = malloc(sizeof(Status));
-    status->code = status_code;
-    status->reason_phrase = reason_phrase;
+    *status = (Status) { status_code, reason_phrase };
+
     StatusLine *status_line = malloc(sizeof(StatusLine));
-    status_line->http_ver = "HTTP/1.0";
-    status_line->status = status;
-    response->status_line = status_line;
-    response->num_headers = 0;
-    response->body = body;
+    *status_line = (StatusLine) { HTTP_VERSION, status };
+
+    Response *response = malloc(sizeof(Response));
+    *response = (Response) { status_line, {}, 0, body };
+
     return response;
 }
 
