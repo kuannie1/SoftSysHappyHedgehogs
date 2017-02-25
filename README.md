@@ -4,9 +4,7 @@ Introduction to project
 
 ### About the Project
 
-Talk about what motivated us 
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+We made library for a webserver in C. This web server hosts a basic web app.
 
 ### Anything else?
 
