@@ -79,6 +79,7 @@ void response_struct_to_str(Response *res, char *output_buffer)
                                             res->status_line->status->reason_phrase,
                                             all_headers_str,
                                             res->body);
+
 }
 
 /* Handles an HTTP request, then closes the connection.
@@ -100,6 +101,7 @@ void *process_request(void *arg)
     // Process the request
     Response *res = (request_arg->server_logic)(input_buffer);
     response_struct_to_str(res, output_buffer);
+    clear_response(res);
 
     // Send back a response
     send(request_arg->client_socket, output_buffer, BUFFER_SIZE, 0);
