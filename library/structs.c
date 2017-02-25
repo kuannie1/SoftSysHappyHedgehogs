@@ -19,8 +19,6 @@ char *get_time_stamp(){
     time_t current_time = time(NULL);
     struct tm *gmt = gmtime(&current_time);
     char *date_str = malloc(DATE_LEN*(sizeof(char)));
-    printf("%s\n", days_of_week[gmt->tm_wday]);
-    printf("%s\n", months[gmt->tm_mon]);
     sprintf(date_str, "%s, %02i %s %04i %02i:%02i:%02i GMT", days_of_week[gmt->tm_wday],
                                                         gmt->tm_mday,
                                                         months[gmt->tm_mon],
@@ -28,13 +26,12 @@ char *get_time_stamp(){
                                                         gmt->tm_hour,
                                                         gmt->tm_min,
                                                         gmt->tm_sec);
-    printf("%s\n", date_str);
     return date_str;
 }
 
 Response *build_response(int status_code, char *body)
 {
-    char reason_phrase[REASON_BUFFER_SIZE];
+    char *reason_phrase = malloc(REASON_BUFFER_SIZE*sizeof(char));
     get_reason_phrase(status_code, reason_phrase);
 
     Status *status = malloc(sizeof(Status));
@@ -54,11 +51,10 @@ Response *build_response(int status_code, char *body)
 
 void clear_response(Response *response)
 {
-    free(response->status_line->http_ver);
     free(response->status_line->status->reason_phrase);
     free(response->status_line->status);
     free(response->status_line);
-    free(response->body);
+    free(response);
 }
 
 // int main()
