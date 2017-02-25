@@ -3,14 +3,17 @@
 #include <regex.h>
 #include <string.h>
 #include "structs.h"
+#include "codes.h"
 
 regex_t regex;
 
+#define HTTP_VERSION "HTTP/1.0"
 #define MAX_LINES 103
 #define REQUEST_LINE_MAX_FIELDS 3
 #define HEADER_MAX_FIELDS 2
 
-void get_matches(char * pattern, char * target, char *** matches, size_t size) {
+void get_matches(char * pattern, char * target, char *** matches, size_t size)
+{
   *matches = malloc(size * sizeof(char *));
   regmatch_t* pmatch = malloc(sizeof(regex_t) * (regex.re_nsub + 1));
   int count = 0;
@@ -34,7 +37,8 @@ void get_matches(char * pattern, char * target, char *** matches, size_t size) {
   regfree(&regex);
 }
 
-Request * make_request(char * raw_req) {
+Request * make_request(char * raw_req)
+{
   Request *r = malloc(sizeof(Request));
   RequestLine *requestLine = malloc(sizeof(RequestLine));
   int i;
@@ -63,7 +67,34 @@ Request * make_request(char * raw_req) {
   return r;
 }
 
-int main() {
+Response *build_response(int status_code, char *body)
+{
+    char reason_phrase[REASON_BUFFER_SIZE];
+    get_reason_phrase(status_code, reason_phrase);
+
+    Status *status = malloc(sizeof(Status));
+    *status = (Status) { status_code, reason_phrase };
+
+    StatusLine *status_line = malloc(sizeof(StatusLine));
+    *status_line = (StatusLine) { HTTP_VERSION, status };
+
+    Response *response = malloc(sizeof(Response));
+    *response = (Response) { status_line, {}, 0, body };
+
+    return response;
+}
+
+void clear_response(Response *response)
+{
+    free(response->status_line->http_ver);
+    free(response->status_line->status->reason_phrase);
+    free(response->status_line->status);
+    free(response->status_line);
+    free(response->body);
+}
+
+int main()
+{
   char * raw_req = "GET /api/testing HTTP/1.1\r\nCookie:chocolate chip\r\nAccept:*/*\r\n\r\nbodytesting";
   Request *req = make_request(raw_req);
   printf("FINAL URL: %s\n", req->request_line.url);
