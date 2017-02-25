@@ -1,14 +1,17 @@
-server: server.o structs.o codes.o
-	gcc -pthread server.o structs.o codes.o -o server
+server: server.o request.o response.o codes.o
+	gcc -pthread server.o request.o response.o codes.o -o server
 
-structs.o: structs.c structs.h codes.h
-	gcc -c structs.c
+request.o: common.h request.h request.c
+	gcc -c request.c
+
+response.o: common.h response.h codes.h response.c
+	gcc -c response.c
 
 codes.o: codes.c codes.h
 	gcc -c codes.c
 
-server.o: server.c structs.h
+server.o: common.h request.h response.h server.c
 	gcc -c server.c
 
 clean:
-	rm server server.o structs.o codes.o
+	rm server server.o request.o response.o codes.o
