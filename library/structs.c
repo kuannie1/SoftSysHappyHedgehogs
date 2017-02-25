@@ -23,6 +23,15 @@ Response *build_response(int status_code, char *body)
     return response;
 }
 
+void clear_response(Response *response)
+{
+    free(response->status_line->http_ver);
+    free(response->status_line->status->reason_phrase);
+    free(response->status_line->status);
+    free(response->status_line);
+    free(response->body);
+}
+
 // int main()
 // {
 //  Request req = {{POST, "/api/helloworld", "HTTP/1.1"}};
