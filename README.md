@@ -16,11 +16,11 @@ This was written by:
 [William Wong](https://github.com/billmwong)
 
 # Background
-This is our first project for ENGR 3525: Software Systems. We wanted to work
-with servers, so we chose to create a library that simplifies the process of
-handling HTTP requests. By simplifying the creation of web applications, we
-get to understand how servers communicate in a network and help others deploy
-their ideas efficiently.
+This is our first project for a computing class at Olin College of Engineering: 
+ENGR 3525: Software Systems. We wanted to work with servers, so we chose to 
+create a library that simplifies the process of handling HTTP requests. By 
+simplifying the creation of web applications, we get to understand how servers 
+communicate in a network and help others deploy their ideas efficiently on the web.
 
 We relied heavily on the HTTP specifications as well as using the examples for
 socket communication from Head First C. We also looked at a HTTP server library
@@ -44,8 +44,9 @@ the right inputs and outputs when starting the server.
 To handle the incoming data, we decided to use the regex library to parse the 
 incoming HTTP request strings one character. This incremental parsing helps us 
 account for special characters such as '\r\n' and ':'. The headers, messages, 
-and other portions in each request/response gets stored in an array for easy 
-accessing. 
+and other portions in each request/response gets stored in arrays for easy 
+accessing. Because we couldn't dynamically make arrays of varying sizes, we 
+allocated <!-- some amount --> of memory to store fields for each request. 
 
 ### Results
 <!-- Add images, screenshots, and videos here -->
