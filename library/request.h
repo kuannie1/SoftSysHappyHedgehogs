@@ -2,6 +2,7 @@
 #define _request_h
 
 #include "common.h"
+#include "headers.h"
 
 typedef struct {
     request_type req_type;
@@ -11,7 +12,7 @@ typedef struct {
 
 typedef struct {
     RequestLine *request_line;
-    MessageHeader headers[MAX_HEADER_SIZE];
+    MessageHeader **headers;
     char *body;
 } Request;
 

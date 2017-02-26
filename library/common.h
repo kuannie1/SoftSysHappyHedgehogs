@@ -1,7 +1,6 @@
 #ifndef _common_h
 #define _common_h
 
-#define MAX_HEADER_SIZE 101
 #define HTTP_VERSION "HTTP/1.0"
 #define BUFFER_SIZE 20000
 #define LINE_BUFFER_SIZE 1024
