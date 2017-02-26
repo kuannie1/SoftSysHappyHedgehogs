@@ -1,6 +1,3 @@
----
-title: Web Server Library in C
----
 # Abstract
 
 We made library for a webserver in C that handles requests, responses for any
