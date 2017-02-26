@@ -16,12 +16,18 @@ Response *build_response(int status_code, char *body)
 
     MessageHeader **headers = create_headers();
 
-    MessageHeader *date = malloc(sizeof(MessageHeader));
-    *date = (MessageHeader) { "Date", get_time_stamp() };
-
     Response *response = malloc(sizeof(Response));
     *response = (Response) { status_line, headers, 0, body };
+
+    MessageHeader *date = malloc(sizeof(MessageHeader));
+    *date = (MessageHeader) { "Date", get_time_stamp() };
     add_header(response, date);
+
+    MessageHeader *length = malloc(sizeof(MessageHeader));
+    char length_str[7];
+    sprintf(length_str, "%i", strlen(body));
+    *length = (MessageHeader) { "Content-Length", length_str };
+    add_header(response, length);
 
     return response;
 }
@@ -41,11 +47,11 @@ void response_struct_to_str(Response *res, char *output_buffer)
     for (int i = 0; i < num_headers; i++) {
         MessageHeader *header = res->headers[i];
         char header_str[BUFFER_SIZE];
-        sprintf(header_str, "%s: %s", header->field_name, header->field_value);
+        sprintf(header_str, "%s: %s\r\n", header->field_name, header->field_value);
         strcat(all_headers_str, header_str);
     }
-    // StatusLine status_line = res->status_line;
-    sprintf(output_buffer, "%s %i %s\r\n%s\r\n\r\n%s\r\n",
+
+    sprintf(output_buffer, "%s %i %s\r\n%s\r\n%s\r\n",
                                             res->status_line->http_ver,
                                             res->status_line->status_code,
                                             res->status_line->reason_phrase,
