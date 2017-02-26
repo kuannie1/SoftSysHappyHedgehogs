@@ -77,6 +77,8 @@ MessageHeader *build_header_from_socket(int socket)
 
     read_socket_until_stopper(socket, ':', nameBuffer);
     read_socket_until_stopper(socket, '\r', valBuffer);
+
+    return build_header(nameBuffer, valBuffer);
 }
 
 /* Builds and returns a Request struct from reading a request from the socket
@@ -84,13 +86,15 @@ MessageHeader *build_header_from_socket(int socket)
 Request *build_request_from_socket(int socket)
 {
     Request *req = malloc(sizeof(Request));
-    char lineBuffer[LINE_BUFFER_SIZE];
+    char *body;
 
-    // Get the first request line
     RequestLine *requestLine = build_request_line_from_socket(socket);
-    req->request_line = requestLine;
+    MessageHeader **headers = create_headers();
+
+    *req = (Request) {requestLine, headers, 0, body};
 
     //Loop through each header line, add to struct as we go
+    add_header_to_request(req, build_header_from_socket(socket));
 
     return req;
 }
