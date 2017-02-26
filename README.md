@@ -4,12 +4,23 @@
 
 We made library for a webserver in C that handles requests, responses for a
 basic web app. We split this project into two main portions: structs to parse
-the HTTP traffic, and a wrapper for talking to the socket.
+the HTTP traffic, and a wrapper for talking to the socket. The idea is that a
+user who wants to write a web application with our library only has to write a
+single function. The function should take in the broken down HTTP request as a
+struct and determine the response code and body of the response. Our library
+handles converting between HTTP requests/responses and structs, and all the work
+required to write to sockets and handle connections.
 
 ### Background
 This is our first project for ENGR 3525: Software Systems. We wanted to work
-with servers, so we chose to develop a simple web server that handles HTTP
-requests.
+with servers, so we chose to create a library that simplifies the process of
+handling HTTP requests. By simplifying the creation of web applications, we
+lower the barrier to entry into the field of computer science as a whole.
+
+We relied heavily on the HTTP specifications as well as using the examples for
+socket communication from Head First C. We also looked at a HTTP server library
+called [Tiny HTTPd](https://sourceforge.net/projects/tinyhttpd/)
+to help us with starting our own server.
 
 ### Authors
 [Anne Ku](https://github.com/kuannie1),
