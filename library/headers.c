@@ -14,6 +14,13 @@ MessageHeader **create_headers()
     return headers;
 }
 
+MessageHeader *build_header(char *field, char *value)
+{
+    MessageHeader *header = malloc(sizeof(MessageHeader));
+    *header = (MessageHeader) { field, value };
+    return header;
+}
+
 void clear_headers(MessageHeader **headers)
 {
     size_t i;
@@ -23,7 +30,13 @@ void clear_headers(MessageHeader **headers)
     free(headers);
 }
 
-void add_header(Response *response, MessageHeader *header)
+void add_header_to_request(Request *request, MessageHeader *header)
+{
+    request->headers[request->num_headers] = header;
+    request->num_headers++;
+}
+
+void add_header_to_response(Response *response, MessageHeader *header)
 {
     response->headers[response->num_headers] = header;
     response->num_headers++;

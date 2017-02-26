@@ -13,6 +13,7 @@ typedef struct {
 typedef struct {
     RequestLine *request_line;
     MessageHeader **headers;
+    int num_headers;
     char *body;
 } Request;
 
