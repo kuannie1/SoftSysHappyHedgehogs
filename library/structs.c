@@ -35,6 +35,13 @@ char *get_time_stamp(){
     return date_str;
 }
 
+/* Stores pointers of detected matches in an allocated char array
+ * 
+ * pattern: a regex pattern to look for in the target
+ * target: the string we parse to find the pattern
+ * matches: a triple pointer to point to the matches[] array
+ * size: int representing the largest # of locations in the matches[] array
+*/
 void get_matches(char * pattern, char * target, char *** matches, size_t size)
 {
   *matches = malloc(size * sizeof(char *));
@@ -48,9 +55,10 @@ void get_matches(char * pattern, char * target, char *** matches, size_t size)
     int len = end - start;
     char match[len];
 
+    // copies the matched string to the match array
     memcpy(match, target + start, len);
-    match[len] = '\0';
-
+    match[len] = '\0'; //null terminator
+    // store a copy of the string to the *matches array 
     (*matches)[count] = strdup(match);
 
     target = target + end;
@@ -60,6 +68,12 @@ void get_matches(char * pattern, char * target, char *** matches, size_t size)
   regfree(&regex);
 }
 
+/*Uses the get_matches() method to split the request lines by field and stores them into different structs
+ * 
+ * raw_req: a character pointer to an unprocessed request
+ * 
+ * return: a complete request object
+*/
 Request * make_request(char * raw_req)
 {
   Request *r = malloc(sizeof(Request));
@@ -90,6 +104,9 @@ Request * make_request(char * raw_req)
   return r;
 }
 
+/*
+
+*/
 Response *build_response(int status_code, char *body)
 {
     char *reason_phrase = malloc(REASON_BUFFER_SIZE*sizeof(char));
