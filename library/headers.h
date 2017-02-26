@@ -3,6 +3,7 @@
 
 #define MAX_HEADER_SIZE 101
 
+struct _request;
 struct _response;
 
 typedef struct {
@@ -11,7 +12,9 @@ typedef struct {
 } MessageHeader;
 
 MessageHeader **create_headers();
+MessageHeader *build_header(char *field, char *value);
 void clear_headers(MessageHeader **headers);
-void add_header(struct _response *response, MessageHeader *header);
+void add_header_to_request(struct _request *request, MessageHeader *header);
+void add_header_to_response(struct _response *response, MessageHeader *header);
 
 #endif

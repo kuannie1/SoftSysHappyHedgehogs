@@ -19,15 +19,16 @@ Response *build_response(int status_code, char *body)
     Response *response = malloc(sizeof(Response));
     *response = (Response) { status_line, headers, 0, body };
 
-    MessageHeader *date = malloc(sizeof(MessageHeader));
-    *date = (MessageHeader) { "Date", get_time_stamp() };
-    add_header(response, date);
+    MessageHeader *date = build_header("Date", get_time_stamp());
+    add_header_to_response(response, date);
 
-    MessageHeader *length = malloc(sizeof(MessageHeader));
     char length_str[7];
     sprintf(length_str, "%i", strlen(body));
-    *length = (MessageHeader) { "Content-Length", length_str };
-    add_header(response, length);
+    MessageHeader *length = build_header("Content-Length", length_str);
+    add_header_to_response(response, length);
+
+    MessageHeader *connection = build_header("Connection", "Closed");
+    add_header_to_response(response, connection);
 
     return response;
 }
