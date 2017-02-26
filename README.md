@@ -1,4 +1,4 @@
-## Web Server
+# Web Server
 
 ### Description
 
@@ -33,6 +33,9 @@ to help us with starting our own server.
 	$ make ___ (instructions for compiling all the server files)
 
 ### Usage
+To use this library, include `server.h` and `structs.h` at the top of your file.
+To start the server, call `start_server()` with the function that encapsulates
+all the server logic as the parameter.
 
 ### Implementation
 The library has two main aspects: Communicating with the socket and sending data
