@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <regex.h>
 #include <string.h>
+#include <time.h>
 #include "structs.h"
 #include "codes.h"
 
@@ -11,6 +12,28 @@ regex_t regex;
 #define MAX_LINES 103
 #define REQUEST_LINE_MAX_FIELDS 3
 #define HEADER_MAX_FIELDS 2
+#define DATE_LEN 30
+
+const char *days_of_week[7] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+const char *months[12] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug",
+                        "Sep", "Oct", "Nov", "Dec"};
+/*
+ * An example of the preferred format is
+ * Sun, 06 Nov 1994 08:49:37 GMT ; IMF-fixdate
+*/
+char *get_time_stamp(){
+    time_t current_time = time(NULL);
+    struct tm *gmt = gmtime(&current_time);
+    char *date_str = malloc(DATE_LEN*(sizeof(char)));
+    sprintf(date_str, "%s, %02i %s %04i %02i:%02i:%02i GMT", days_of_week[gmt->tm_wday],
+                                                        gmt->tm_mday,
+                                                        months[gmt->tm_mon],
+                                                        ((gmt->tm_year)+1900),
+                                                        gmt->tm_hour,
+                                                        gmt->tm_min,
+                                                        gmt->tm_sec);
+    return date_str;
+}
 
 void get_matches(char * pattern, char * target, char *** matches, size_t size)
 {
@@ -69,7 +92,7 @@ Request * make_request(char * raw_req)
 
 Response *build_response(int status_code, char *body)
 {
-    char reason_phrase[REASON_BUFFER_SIZE];
+    char *reason_phrase = malloc(REASON_BUFFER_SIZE*sizeof(char));
     get_reason_phrase(status_code, reason_phrase);
 
     Status *status = malloc(sizeof(Status));
@@ -78,27 +101,19 @@ Response *build_response(int status_code, char *body)
     StatusLine *status_line = malloc(sizeof(StatusLine));
     *status_line = (StatusLine) { HTTP_VERSION, status };
 
+    MessageHeader date = {"Date", get_time_stamp()};
+
     Response *response = malloc(sizeof(Response));
-    *response = (Response) { status_line, {}, 0, body };
+    *response = (Response) { status_line, {}, 1, body };
+    response->headers[0] = date;
 
     return response;
 }
 
 void clear_response(Response *response)
 {
-    free(response->status_line->http_ver);
     free(response->status_line->status->reason_phrase);
     free(response->status_line->status);
     free(response->status_line);
-    free(response->body);
-}
-
-int main()
-{
-  char * raw_req = "GET /api/testing HTTP/1.1\r\nCookie:chocolate chip\r\nAccept:*/*\r\n\r\nbodytesting";
-  Request *req = make_request(raw_req);
-  printf("FINAL URL: %s\n", req->request_line.url);
-  printf("FINAL HEADER1: %s\n", req->headers[0].field_name);
-  printf("FINAL HEADER2: %s\n", req->headers[1].field_name);
-  return 0;
+    free(response);
 }

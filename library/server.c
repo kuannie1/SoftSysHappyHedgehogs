@@ -11,11 +11,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "structs.h"
+#include "request.h"
+#include "response.h"
 
 #define QUEUE_SIZE 10
 #define PORT 8080
-#define BUFFER_SIZE 20000
 
 typedef struct {
     int client_socket;
@@ -62,26 +62,6 @@ int setup(u_short *port)
     return socket_fd;
 }
 
-void response_struct_to_str(Response *res, char *output_buffer)
-{
-    int num_headers = res->num_headers;
-    char all_headers_str[BUFFER_SIZE];
-    for (int i = 0; i < num_headers; i++) {
-        MessageHeader header = res->headers[i];
-        char header_str[BUFFER_SIZE];
-        sprintf(header_str, "%s: %s", header.field_name, header.field_value);
-        strcat(all_headers_str, header_str);
-    }
-    // StatusLine status_line = res->status_line;
-    sprintf(output_buffer, "%s %i %s\r\n%s\r\n%s\r\n",
-                                            res->status_line->http_ver,
-                                            res->status_line->status->code,
-                                            res->status_line->status->reason_phrase,
-                                            all_headers_str,
-                                            res->body);
-
-}
-
 /* Handles an HTTP request, then closes the connection.
  *
  * arg: a pointer to a ProcessRequestArg with information about how to handle the request
@@ -101,11 +81,12 @@ void *process_request(void *arg)
     // Process the request
     Response *res = (request_arg->server_logic)(input_buffer);
     response_struct_to_str(res, output_buffer);
-    clear_response(res);
 
     // Send back a response
     send(request_arg->client_socket, output_buffer, BUFFER_SIZE, 0);
     send(request_arg->client_socket, "\n", 1, 0);
+
+    clear_response(res);
 
     close(request_arg->client_socket);
 }
@@ -174,8 +155,6 @@ Response *caesar_cipher(char *input_buffer)
  */
 Response *write_html_page(char *input_buffer)
 {
-    int code = 200;
-
     Response *res = build_response(200, "<body>Sup</body>\r\n");
     return res;
 }
