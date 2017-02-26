@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "headers.h"
+#include "request.h"
 #include "response.h"
 
 MessageHeader **create_headers()
