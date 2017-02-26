@@ -2,7 +2,7 @@
 
 ### Description
 
-We made library for a webserver in C. This web server hosts a basic web app.
+We made library for a webserver in C that handles requests, responses for a basic web app. 
 
 ### Authors
 Anne Ku: worked on ...
@@ -11,7 +11,8 @@ Serena Chen: worked on ...
 William Wong: worked on ...
 
 ### Getting Started (Installation Instructions)
-
+	$ git clone https://github.com/kuannie1/SoftSysHappyHedgehogs.git
+	$ make ___
 ### Usage
 
 ### License
