@@ -30,6 +30,12 @@ void clear_headers(MessageHeader **headers)
     free(headers);
 }
 
+void add_header_to_request(Request *request, MessageHeader *header)
+{
+    request->headers[request->num_headers] = header;
+    request->num_headers++;
+}
+
 void add_header_to_response(Response *response, MessageHeader *header)
 {
     response->headers[response->num_headers] = header;
