@@ -19,6 +19,7 @@ This was written by:
 [William Wong](https://github.com/billmwong)
 
 # Background
+
 This is our first project for a computing class at Olin College of Engineering:
 ENGR 3525: Software Systems. We wanted to work with servers, so we chose to
 create a library that simplifies the process of handling HTTP requests. By
