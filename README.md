@@ -52,8 +52,11 @@ we found out that it was possible to pass functions as parameters. Using that,
 we were able to only require that the user's application pass in a function with
 the right inputs and outputs when starting the server.
 
-To handle the incoming data, we decided to read the incoming HTTP request strings 
-character by character. We had to do this 
+To handle the incoming data, we decided to use the regex library to parse the 
+incoming HTTP request strings one character. This incremental parsing helps us 
+account for special characters such as '\r\n' and ':'. The headers, messages, 
+and other portions in each request/response gets stored in an array for easy 
+accessing. 
 
 ### Results
 <!-- Add images, screenshots, and videos here -->
