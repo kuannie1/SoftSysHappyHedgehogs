@@ -138,9 +138,10 @@ void start_server(Response * (*server_logic)(char *))
  */
 Response *caesar_cipher(char *input_buffer)
 {
+    int i;
     printf(input_buffer);
     char caesar[sizeof(input_buffer)];
-    for (int i=0; i<sizeof(input_buffer); i++) {
+    for (i=0; i<sizeof(input_buffer); i++) {
         caesar[i] = input_buffer[i] + 1;
     }
     Response *res = build_response(200, caesar);
