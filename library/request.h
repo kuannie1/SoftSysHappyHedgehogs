@@ -10,7 +10,7 @@ typedef struct {
     char *http_ver;
 } RequestLine;
 
-typedef struct {
+typedef struct _request {
     RequestLine *request_line;
     MessageHeader **headers;
     int num_headers;

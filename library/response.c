@@ -27,7 +27,7 @@ Response *build_response(int status_code, char *body)
     MessageHeader *length = build_header("Content-Length", length_str);
     add_header_to_response(response, length);
 
-    MessageHeader *connection = build_header("Connection", "Closed");
+    MessageHeader *connection = build_header("Connection", "close");
     add_header_to_response(response, connection);
 
     return response;
@@ -37,7 +37,7 @@ void clear_response(Response *response)
 {
     free(response->status_line->reason_phrase);
     free(response->status_line);
-    clear_headers(response->headers);
+    clear_headers(response->headers, response->num_headers);
     free(response);
 }
 

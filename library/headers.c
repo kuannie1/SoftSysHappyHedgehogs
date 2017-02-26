@@ -6,12 +6,6 @@
 MessageHeader **create_headers()
 {
     MessageHeader **headers = malloc(MAX_HEADER_SIZE * sizeof(MessageHeader *));
-
-    size_t i;
-    for (i = 0; i < MAX_HEADER_SIZE; i++) {
-        headers[i] = malloc(sizeof(MessageHeader));
-    }
-
     return headers;
 }
 
@@ -22,10 +16,10 @@ MessageHeader *build_header(char *field, char *value)
     return header;
 }
 
-void clear_headers(MessageHeader **headers)
+void clear_headers(MessageHeader **headers, int num_headers)
 {
     size_t i;
-    for (i = 0; i < MAX_HEADER_SIZE; i++) {
+    for (i = 0; i < num_headers; i++) {
         free(headers[i]);
     }
     free(headers);
