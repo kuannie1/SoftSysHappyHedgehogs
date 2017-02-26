@@ -16,22 +16,20 @@ request_type request_type_string_to_enum(const char *str)
     printf("ERROR: No such request type: %s\n", str);
 }
 
-/* Calls recv() char-by-char until it hits a space or a \r, then puts that
- * string into the buffer.
+/* Reads the socket char-by-char to the buffer until it hits the stopper
+ * character
  */
-void get_word_from_socket(int socket, char *buffer)
-{
+void read_socket_until_stopper(int socket, char stopper, char *buffer) {
     int i;
     for (i = 0; i<LINE_BUFFER_SIZE; i++) {
         char char_buffer;
         recv(socket, &char_buffer, 1, 0);
-        if (char_buffer == ' ') {
+        if (char_buffer == stopper) {
             buffer[i] = '\0';
-            break;
-        } else if (char_buffer == '\r') {
-            buffer[i] = '\0';
-            // Read the next \n too to get rid of it
-            recv(socket, &char_buffer, 1, 0);
+            if (stopper == '\r') {
+                // Read the next \n too to get rid of it
+                recv(socket, &char_buffer, 1, 0);
+            }
             break;
         }
         buffer[i] = char_buffer;
@@ -48,13 +46,13 @@ RequestLine *build_request_line_from_socket(int socket)
     char urlBuffer[LINE_BUFFER_SIZE];
     char versionBuffer[MAX_VERSION_SIZE];
 
-    get_word_from_socket(socket, typeBuffer);
+    read_socket_until_stopper(socket, ' ', typeBuffer);
     requestLine->req_type = request_type_string_to_enum(typeBuffer);
 
-    get_word_from_socket(socket, urlBuffer);
+    read_socket_until_stopper(socket, ' ', urlBuffer);
     requestLine->url = urlBuffer;
 
-    get_word_from_socket(socket, versionBuffer);
+    read_socket_until_stopper(socket, '\r', versionBuffer);
     requestLine->http_ver = versionBuffer;
 
     return requestLine;
@@ -65,18 +63,20 @@ RequestLine *build_request_line_from_socket(int socket)
  */
 void get_line_from_socket(int socket, char *buffer)
 {
+    read_socket_until_stopper(socket, '\r', buffer);
+}
+
+/* Assume the socket is currently at a header line. Builds and returns a
+ * MessageHeader struct with the name and value of the current line.
+ */
+MessageHeader *build_header_from_socket(int socket)
+{
     int i;
-    for (i = 0; i<LINE_BUFFER_SIZE; i++) {
-        char char_buffer;
-        recv(socket, &char_buffer, 1, 0);
-        if (char_buffer == '\r') {
-            buffer[i] = '\0';
-            // Read the next \n too to get rid of it
-            recv(socket, &char_buffer, 1, 0);
-            break;
-        }
-        buffer[i] = char_buffer;
-    }
+    char nameBuffer[LINE_BUFFER_SIZE];
+    char valBuffer[LINE_BUFFER_SIZE];
+
+    read_socket_until_stopper(socket, ':', nameBuffer);
+    read_socket_until_stopper(socket, '\r', valBuffer);
 }
 
 /* Builds and returns a Request struct from reading a request from the socket
@@ -88,6 +88,7 @@ Request *build_request_from_socket(int socket)
 
     // Get the first request line
     RequestLine *requestLine = build_request_line_from_socket(socket);
+    req->request_line = requestLine;
 
     //Loop through each header line, add to struct as we go
 
