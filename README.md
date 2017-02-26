@@ -2,9 +2,12 @@
 
 ### Description
 
-We made library for a webserver in C that handles requests, responses for a basic web app. 
+We made library for a webserver in C that handles requests, responses for a basic web app. We split this project into two main portions: structs to parse the HTTP traffic, and a wrapper for talking to the socket.
 
-### Authors
+### Background
+This is our first project for ENGR 3525: Software Systems. We wanted to work with servers, so we chose to develop a simple web server that handles HTTP requests. 
+
+#### Authors
 Anne Ku: worked on ...
 Samuel Myers: worked on ...
 Serena Chen: worked on ...
