@@ -27,7 +27,7 @@ socket communication from Head First C. We also looked at a HTTP server library
 called [Tiny HTTPd](https://sourceforge.net/projects/tinyhttpd/)
 to help us with starting our own server.
 
-### Implementation
+# Implementation
 The library has two main aspects: Communicating with the socket and sending data
 through the HTTP protocol. We spent a long time figuring out how to architect
 our system and modularize the code so all 4 of us could work on it.
@@ -41,13 +41,13 @@ we found out that it was possible to pass functions as parameters. Using that,
 we were able to only require that the user's application pass in a function with
 the right inputs and outputs when starting the server.
 
-To handle the incoming data, we decided to use the regex library to parse the 
-incoming HTTP request strings one character. This incremental parsing helps us 
-account for special characters such as '\r\n' and ':'. The headers, messages, 
-and other portions in each request/response gets stored in an array for easy 
-accessing. 
+To handle the incoming data, we decided to use the regex library to parse the
+incoming HTTP request strings one character. This incremental parsing helps us
+account for special characters such as '\r\n' and ':'. The headers, messages,
+and other portions in each request/response gets stored in an array for easy
+accessing.
 
-### Results
+# Results
 <!-- Add images, screenshots, and videos here -->
 
 <!-- ## Content we need to cover:
