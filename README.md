@@ -1,4 +1,4 @@
-## (title) Web Server
+## Web Server
 
 ### Description
 
@@ -20,7 +20,8 @@ William Wong: worked on ...
 
 ### License
 
-## Content we need to cover:
+
+<!-- ## Content we need to cover:
 
 Big Idea/Abstract
 
@@ -40,3 +41,4 @@ Provide evidence demonstrating that what you built works. Though the details wil
 
 
 Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+ -->
