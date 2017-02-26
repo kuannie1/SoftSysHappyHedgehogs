@@ -2,20 +2,22 @@
 
 ### Description
 
-We made library for a webserver in C that handles requests, responses for a
+We made library for a webserver in C that handles requests, responses for any
 basic web app. We split this project into two main portions: structs to parse
 the HTTP traffic, and a wrapper for talking to the socket. The idea is that a
 user who wants to write a web application with our library only has to write a
 single function. The function should take in the broken down HTTP request as a
 struct and determine the response code and body of the response. Our library
-handles converting between HTTP requests/responses and structs, and all the work
-required to write to sockets and handle connections.
+handles processes such as converting between HTTP requests/responses and structs, 
+and writing to sockets, and handling connections.
 
 ### Background
 This is our first project for ENGR 3525: Software Systems. We wanted to work
 with servers, so we chose to create a library that simplifies the process of
 handling HTTP requests. By simplifying the creation of web applications, we
-lower the barrier to entry into the field of computer science as a whole.
+<!-- lower the barrier to entry into the field of computer science as a whole. -->
+get to understand how servers communicate in a network and help others deploy
+their ideas efficiently. 
 
 We relied heavily on the HTTP specifications as well as using the examples for
 socket communication from Head First C. We also looked at a HTTP server library
@@ -47,6 +49,9 @@ application when there was new data to process. However, after using pthreads,
 we found out that it was possible to pass functions as parameters. Using that,
 we were able to only require that the user's application pass in a function with
 the right inputs and outputs when starting the server.
+
+To handle the incoming data, we decidied to read the incoming HTTP requests character
+by character.
 
 ### Results
 <!-- Add images, screenshots, and videos here -->
