@@ -24,9 +24,4 @@ const static struct {
     {CONNECT, "CONNECT"}
 };
 
-typedef struct {
-    char *field_name;
-    char *field_value; //is field_content
-} MessageHeader;
-
 #endif
