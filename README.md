@@ -50,8 +50,8 @@ we found out that it was possible to pass functions as parameters. Using that,
 we were able to only require that the user's application pass in a function with
 the right inputs and outputs when starting the server.
 
-To handle the incoming data, we decidied to read the incoming HTTP requests character
-by character.
+To handle the incoming data, we decided to read the incoming HTTP request strings 
+character by character. We had to do this 
 
 ### Results
 <!-- Add images, screenshots, and videos here -->
