@@ -2,6 +2,7 @@
 #define _response_h
 
 #include "common.h"
+#include "headers.h"
 
 typedef struct {
     int status_code;
@@ -9,13 +10,12 @@ typedef struct {
     char *http_ver;
 } StatusLine;
 
-typedef struct {
+typedef struct _response {
     StatusLine *status_line;
-    MessageHeader headers[MAX_HEADER_SIZE];
+    MessageHeader **headers;
     int num_headers;
     char *body;
 } Response;
-
 
 Response *build_response(int status_code, char *body);
 void clear_response(Response *response);
