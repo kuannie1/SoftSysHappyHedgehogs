@@ -27,7 +27,7 @@ socket communication from Head First C. We also looked at a HTTP server library
 called [Tiny HTTPd](https://sourceforge.net/projects/tinyhttpd/)
 to help us with starting our own server.
 
-### Implementation
+# Implementation
 The library has two main aspects: Communicating with the socket and sending data
 through the HTTP protocol. We spent a long time figuring out how to architect
 our system and modularize the code so all 4 of us could work on it.
@@ -48,7 +48,7 @@ and other portions in each request/response gets stored in arrays for easy
 accessing. Because we couldn't dynamically make arrays of varying sizes, we 
 allocated <!-- some amount --> of memory to store fields for each request. 
 
-### Results
+# Results
 <!-- Add images, screenshots, and videos here -->
 
 <!-- ## Content we need to cover:
