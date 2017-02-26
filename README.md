@@ -8,16 +8,15 @@ the HTTP traffic, and a wrapper for talking to the socket. The idea is that a
 user who wants to write a web application with our library only has to write a
 single function. The function should take in the broken down HTTP request as a
 struct and determine the response code and body of the response. Our library
-handles processes such as converting between HTTP requests/responses and structs, 
+handles processes such as converting between HTTP requests/responses and structs,
 and writing to sockets, and handling connections.
 
 ### Background
 This is our first project for ENGR 3525: Software Systems. We wanted to work
 with servers, so we chose to create a library that simplifies the process of
 handling HTTP requests. By simplifying the creation of web applications, we
-<!-- lower the barrier to entry into the field of computer science as a whole. -->
 get to understand how servers communicate in a network and help others deploy
-their ideas efficiently. 
+their ideas efficiently.
 
 We relied heavily on the HTTP specifications as well as using the examples for
 socket communication from Head First C. We also looked at a HTTP server library
