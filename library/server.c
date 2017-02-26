@@ -75,9 +75,9 @@ void *process_request(void *arg)
     memset(&output_buffer, 0, BUFFER_SIZE);
 
     // Retreive the message from the client socket and load into the input buffer
-    recv(request_arg->client_socket, input_buffer, BUFFER_SIZE, 0);
+    Request *req = build_request_from_socket(request_arg->client_socket);
 
-    printf(input_buffer);
+    // printf("SERVER.C: %s\n",input_buffer);
     // Process the request
     Response *res = (request_arg->server_logic)(input_buffer);
     response_struct_to_str(res, output_buffer);
