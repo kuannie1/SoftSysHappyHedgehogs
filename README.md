@@ -50,9 +50,11 @@ hold a proper server connection.
 ## Clients and Servers
 
 For this project, there are two machines: the client and the server. They follow 
-the HTTP protocol, which specifies 2 main processes: a Request and a Response. 
-
-
+the HTTP protocol, which specifies 2 main processes: a request and a response. The 
+request is made by a string of terms that is read from the socket. That incoming 
+string then gets parsed by the client file to structure a suitable response struct 
+for the client to send to the server. The server then makes a response struct in 
+response to the client's request, which will get parsed by the client file. 
 
 # Implementation
 The library has two main aspects: Communicating with the socket and sending data
