@@ -73,7 +73,7 @@ void *process_request(void *arg)
     char *url = request->request_line->url;
     request_type method = request->request_line->req_type;
 
-    printf("%s %i\r\n", url, method);
+    printf("%s %i\r\n\r\n", url, method);
 
     func_ptr endpoint_function;
     Response *response;
@@ -96,6 +96,7 @@ void *process_request(void *arg)
     // Send back a response
     send(socket, output_buffer, BUFFER_SIZE, 0);
 
+    clear_request(request);
     clear_response(response);
     close(socket);
 }
@@ -119,6 +120,13 @@ Application *create_application(unsigned short port, size_t queue_size)
     return app;
 }
 
+/* Registers an endpoint function with the application.
+ *
+ * app: an initialized Application struct.
+ * path: the URL pattern to match to this endpoint.
+ * method: the HTTP method to match to this endpoint.
+ * function: a pointer to the function to register.
+ */
 void register_endpoint(Application *app, const char *path, request_type method,
                        func_ptr function)
 {
@@ -136,6 +144,9 @@ void register_endpoint(Application *app, const char *path, request_type method,
  * path: the URI to match.
  * method: the HTTP method to match.
  * function: a memory address to assign the matched function pointer to.
+ *
+ * returns: an int indicating the success of this operation.
+ *          nonzero return value indicates that the endpoint does not exist.
  */
 int get_function(Application *app, const char *path, request_type method,
                  func_ptr *function)
@@ -173,7 +184,7 @@ int get_function(Application *app, const char *path, request_type method,
  * socket and runs continuously, taking in clients that connect and using the
  * passed in server_logic function to process the clients' requests.
  *
- * app: pointer to application that maps functions to endpoints
+ * app: pointer to Application struct that maps functions to endpoints
  */
 void start_server(Application *app)
 {
