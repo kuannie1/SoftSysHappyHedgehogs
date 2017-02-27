@@ -44,7 +44,7 @@ void flush_socket(int socket)
     // Read infinitely until the socket has no more info or recv gives an error
     for (;;) {
         char buffer[BUFFER_SIZE];
-        if (select(socket+1, &set, NULL, NULL, &tv) < 1){
+        if (select(socket+1, &set, NULL, NULL, &tv) < 1) {
             // Socket has no more information
             return;
         }
@@ -81,7 +81,7 @@ int read_socket_until_stopper(int socket, char stopper, char *buffer, int length
     for (i = 0; i<length; i++) {
         char *char_buffer = malloc(sizeof(char));
 
-        if (select(socket+1, &set, NULL, NULL, &tv) < 1){
+        if (select(socket+1, &set, NULL, NULL, &tv) < 1) {
             // Socket has no more information
             buffer[i] = '\0';
             return 1;
