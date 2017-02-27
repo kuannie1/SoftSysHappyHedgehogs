@@ -27,7 +27,7 @@ Response *build_response(int status_code, char *body)
     MessageHeader *length = build_header("Content-Length", length_str);
     add_header_to_response(response, length);
 
-    MessageHeader *type = build_header("Content-Type", "text/html; charset=utf-8");
+    MessageHeader *type = build_header("Content-Type", "text/html");
     add_header_to_response(response, type);
 
     MessageHeader *connection = build_header("Connection", "close");
