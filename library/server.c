@@ -73,7 +73,8 @@ void *process_request(void *arg)
     char *url = request->request_line->url;
     request_type method = request->request_line->req_type;
 
-    printf("%s %i\r\n\r\n", url, method);
+    printf("%s %i\r\n", url, method);
+    print_headers(request->headers, request->num_headers);
 
     func_ptr endpoint_function;
     Response *response;

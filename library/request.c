@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/select.h>
 #include "request.h"
 
 /* Converts a string to a request_type enum
@@ -85,16 +86,15 @@ RequestLine *build_request_line_from_socket(int socket)
  */
 MessageHeader *build_header_from_string(char *str)
 {
-    char *copy = malloc(sizeof(char) * strlen(str));
-    char *name = malloc(sizeof(char) * strlen(str));
-    char *val = malloc(sizeof(char) * strlen(str));
+    char copy[strlen(str)];
+    char *name;
+    char *val;
 
     strcpy(copy, str);
     name = strtok(copy, ":");
     val = strtok(NULL, "");
+    val++;
 
-    // Get rid of leading space
-    val = val + 1;
     return build_header(name, val);
 }
 
