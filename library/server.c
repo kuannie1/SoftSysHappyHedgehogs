@@ -66,7 +66,7 @@ void *process_request(void *arg)
 
     char input_buffer[BUFFER_SIZE];
     char output_buffer[BUFFER_SIZE];
-    memset(&output_buffer, 0, BUFFER_SIZE);
+    memset(&output_buffer, 0, BUFFER_SIZE); //clear buffer
 
     // Retreive the request from the client socket
     Request *request = build_request_from_socket(socket);
@@ -100,6 +100,14 @@ void *process_request(void *arg)
     close(socket);
 }
 
+/* Creates an Application, which keeps track of a port, and queue size, and
+ * allocates an array to map endpoints to functions
+ *
+ * port: port number
+ * queue_size: the number of connections to accept at a time
+ *
+ * returns: a pointer to the created Application struct
+ */
 Application *create_application(unsigned short port, size_t queue_size)
 {
     Endpoint **endpoints = malloc(MAX_ENDPTS * sizeof(Endpoint *));
@@ -165,7 +173,7 @@ int get_function(Application *app, const char *path, request_type method,
  * socket and runs continuously, taking in clients that connect and using the
  * passed in server_logic function to process the clients' requests.
  *
- * Errors may occur is things happen.
+ * app: pointer to application that maps functions to endpoints
  */
 void start_server(Application *app)
 {
