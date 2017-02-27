@@ -68,10 +68,8 @@ void *process_request(void *arg)
     char output_buffer[BUFFER_SIZE];
     memset(&output_buffer, 0, BUFFER_SIZE);
 
-    // Retreive the message from the client socket and load into the input buffer
-    recv(socket, input_buffer, BUFFER_SIZE, 0);
-
-    printf(input_buffer);
+    // Retreive the request from the client socket
+    Request *request = build_request_from_socket(socket);
 
     func_ptr *method;
     Response *response;

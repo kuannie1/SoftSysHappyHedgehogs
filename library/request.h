@@ -17,4 +17,6 @@ typedef struct _request {
     char *body;
 } Request;
 
+Request *build_request_from_socket(int socket);
+
 #endif
