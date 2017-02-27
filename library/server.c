@@ -69,7 +69,11 @@ void *process_request(void *arg)
     memset(&output_buffer, 0, BUFFER_SIZE);
 
     // Retreive the request from the client socket
-    Request *request = build_request_from_socket(socket);
+    Request *request = malloc(sizeof(Request));
+    if (!build_request_from_socket(socket, request)) {
+        // Request could not be parsed
+        printf("request could not be parsed!\n");
+    }
     char *url = request->request_line->url;
     request_type method = request->request_line->req_type;
 
