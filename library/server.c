@@ -70,17 +70,26 @@ void *process_request(void *arg)
 
     // Retreive the request from the client socket
     Request *request = build_request_from_socket(socket);
+    char *url = request->request_line->url;
+    request_type method = request->request_line->req_type;
 
-    printf("%s %i\r\n", request->request_line->url, request->request_line->req_type);
+    printf("%s %i\r\n", url, method);
 
-    func_ptr method;
+    func_ptr endpoint_function;
     Response *response;
-    if (get_method(context, request->request_line->url, &method) != 0) {
-        // No match to this path, return a 404
-        response = build_response(404, "<h1>404 Not Found</h1>");
-    } else {
-        // Process the request
-        response = method(request);
+    switch (get_function(context, url, method, &endpoint_function)) {
+        case -1:
+            // No match to this path, return a 404
+            response = build_response(404, "<h1>404 Not Found</h1>\r\n");
+            break;
+        case -2:
+            // Matching path but not matching HTTP method
+            response = build_response(405, "<h1>Method Not Allowed</h1>\r\n");
+            break;
+        case 0:
+            // Process the request
+            response = endpoint_function(request);
+            break;
     }
     response_struct_to_str(response, output_buffer);
 
@@ -93,32 +102,60 @@ void *process_request(void *arg)
 
 Application *create_application(unsigned short port, size_t queue_size)
 {
-    char **endpoints = malloc(MAX_ENDPTS * MAX_ENDPT_LEN * sizeof(char));
-    func_ptr *methods = malloc(MAX_ENDPTS * sizeof(func_ptr *));
+    Endpoint **endpoints = malloc(MAX_ENDPTS * sizeof(Endpoint *));
+    func_ptr *functions = malloc(MAX_ENDPTS * sizeof(func_ptr *));
 
     Application *app = malloc(sizeof(Application));
-    *app = (Application) { port, queue_size, endpoints, methods, 0 };
+    *app = (Application) { port, queue_size, endpoints, functions, 0 };
 
     return app;
 }
 
-void register_endpoint(Application *app, const char *path, func_ptr *method)
+void register_endpoint(Application *app, const char *path, request_type method,
+                       func_ptr function)
 {
-    app->endpoints[app->num_endpoints] = path;
-    app->methods[app->num_endpoints] = method;
+    Endpoint *endpoint = malloc(sizeof(Endpoint));
+    *endpoint = (Endpoint) { path, method };
+
+    app->endpoints[app->num_endpoints] = endpoint;
+    app->functions[app->num_endpoints] = function;
     app->num_endpoints++;
 }
 
-int get_method(Application *app, const char *path, func_ptr **method)
+/* Finds the registered endpoint function for a given path and method.
+ *
+ * app: a pointer to the Application struct.
+ * path: the URI to match.
+ * method: the HTTP method to match.
+ * function: a memory address to assign the matched function pointer to.
+ */
+int get_function(Application *app, const char *path, request_type method,
+                 func_ptr *function)
 {
     size_t i = 0;
-    while (i < app->num_endpoints && strcasecmp(path, app->endpoints[i]))
+    bool path_found = false;
+    bool method_found = false;
+
+    while (i < app->num_endpoints && !(path_found && method_found)) {
+        if (strcasecmp(path, app->endpoints[i]->path) == 0) {
+            path_found = true;
+
+            if (app->endpoints[i]->method == method) {
+                method_found = true;
+                continue;
+            }
+        }
         i++;
+    }
 
     if (i >= app->num_endpoints) {
-        return -1;
+        if (path_found) {
+            return -2;
+        } else {
+            return -1;
+        }
     } else {
-        *method = app->methods[i];
+        *function = app->functions[i];
         return 0;
     }
 }

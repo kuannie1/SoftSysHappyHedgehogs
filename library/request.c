@@ -8,7 +8,7 @@
 request_type request_type_string_to_enum(const char *str)
 {
     int i;
-    for (i=0; i<sizeof(conversion)/sizeof(conversion[0]);i++) {
+    for (i = 0; i < sizeof(conversion)/sizeof(conversion[0]); i++) {
         if (!strcmp(str, conversion[i].str)) {
             return conversion[i].val;
         }
@@ -47,11 +47,9 @@ RequestLine *build_request_line_from_socket(int socket)
     char *version_buffer = malloc(MAX_VERSION_SIZE * sizeof(char));
 
     read_socket_until_stopper(socket, ' ', type_buffer);
-    printf("%s\n", type_buffer);
     request_line->req_type = request_type_string_to_enum(type_buffer);
 
     read_socket_until_stopper(socket, ' ', url_buffer);
-    printf("%s\n", url_buffer);
     request_line->url = url_buffer;
 
     read_socket_until_stopper(socket, '\r', version_buffer);
