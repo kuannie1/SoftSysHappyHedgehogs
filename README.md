@@ -17,7 +17,7 @@ This was written by:
 
 # Background
 
-This is our first project for a computing class at Olin College of Engineering:
+<!-- This is our first project for a computing class at Olin College of Engineering:
 ENGR 3525: Software Systems. We wanted to work with servers, so we chose to
 create a library that simplifies the process of handling HTTP requests. By
 simplifying the creation of web applications, we get to understand how servers
@@ -26,7 +26,33 @@ communicate in a network and help others deploy their ideas efficiently on the w
 We relied heavily on the HTTP specifications as well as using the examples for
 socket communication from Head First C. We also looked at a HTTP server library
 called [Tiny HTTPd](https://sourceforge.net/projects/tinyhttpd/)
-to help us with starting our own server.
+to help us with starting our own server. -->
+
+For programs on different machines to talk to each other, we need some machines 
+to behave as servers and some machines to behave as clients. To make sure this 
+connection is warranted, these machines need to follow a set of rules, or protocols 
+before they start to communicate. For this project, we use the Hypertext Transfer 
+Protocol (HTTP) to handle the server-client traffic and an abstracted 
+version of the Transfer Control Protocol for the sockets to prepare a request to 
+the server.
+
+## Sockets
+
+Since I/O file reading is not suitable for talking in the web, we need sockets, a 
+type of data stream. To connect to these sockets, however, we need to bind to the 
+server's port. This port will be a number that we can use to access the active 
+server. After making sure the port number works, then we make a system call called 
+listen() to see if the connection is warranted. After accepting the listen() system 
+call, the server waits until the client contacts the server again. This last step is 
+done under the accept() system call, which returns a second socket descriptor to 
+hold a proper server connection.
+
+## Clients and Servers
+
+For this project, there are two machines: the client and the server. They follow 
+the HTTP protocol, which specifies 2 main processes: a Request and a Response. 
+
+
 
 # Implementation
 The library has two main aspects: Communicating with the socket and sending data
@@ -48,6 +74,9 @@ account for special characters such as '\r\n' and ':'. The headers, messages,
 and other portions in each request/response gets stored in arrays for easy
 accessing. Because we couldn't dynamically make arrays of varying sizes, we
 allocated <!-- some amount --> of memory to store fields for each request.
+
+
+<!-- Our diagram here -->
 
 # Results
 <!-- Add images, screenshots, and videos here -->
