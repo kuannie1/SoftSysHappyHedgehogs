@@ -21,16 +21,37 @@ request_type request_type_string_to_enum(const char *str)
  */
 void read_socket_until_stopper(int socket, char stopper, char *buffer) {
     int i;
-    for (i = 0; i<LINE_BUFFER_SIZE; i++) {
+    fd_set set;
+    struct timeval tv;
+
+    // Set timeout to .01 seconds
+    tv.tv_sec = 0;
+    tv.tv_usec = 10000;
+
+    // Add socket to to file descriptor set
+    FD_SET(socket, &set);
+
+    for (i = 0; i<BUFFER_SIZE; i++) {
         char char_buffer;
-        recv(socket, &char_buffer, 1, 0);
+
+        if (select(socket+1, &set, NULL, NULL, &tv) < 1){
+            // Socket has no more information
+            buffer[i] = '\0';
+            return;
+        }
+        if (recv(socket, &char_buffer, 1, 0) < 1) {
+            // recv gave an error
+            buffer[i] = '\0';
+            return;
+        }
         if (char_buffer == stopper || char_buffer == '\r') {
+            // We've reached the stopper char or the end of the line
             buffer[i] = '\0';
             if (char_buffer == '\r') {
                 // Read the next \n too to get rid of it
                 recv(socket, &char_buffer, 1, 0);
             }
-            break;
+            return;
         }
         buffer[i] = char_buffer;
     }
@@ -67,8 +88,8 @@ RequestLine *build_request_line_from_socket(int socket)
 MessageHeader *build_header_from_string(char *str)
 {
     char *copy = malloc(sizeof(char) * strlen(str));
-    char *name;
-    char *val;
+    char *name = malloc(sizeof(char) * strlen(str));
+    char *val = malloc(sizeof(char) * strlen(str));
 
     strcpy(copy, str);
     name = strtok(copy, ":");
@@ -84,10 +105,10 @@ MessageHeader *build_header_from_string(char *str)
 Request *build_request_from_socket(int socket)
 {
     Request *req = malloc(sizeof(Request));
-    char *body;
+    char *body = malloc(sizeof(char) * BUFFER_SIZE);
+    MessageHeader **headers = create_headers();
 
     RequestLine *request_line = build_request_line_from_socket(socket);
-    MessageHeader **headers = create_headers();
 
     *req = (Request) { request_line, headers, 0, body };
 
@@ -100,6 +121,9 @@ Request *build_request_from_socket(int socket)
         if (!line_buffer[0]) break;
         add_header_to_request(req, build_header_from_string(line_buffer));
     }
+
+    // The rest of the socket is the body
+    read_socket_until_stopper(socket, '\r', body);
 
     return req;
 }
