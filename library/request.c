@@ -101,3 +101,13 @@ Request *build_request_from_socket(int socket)
 
     return req;
 }
+
+void clear_request(Request *request)
+{
+    free(request->request_line->url);
+    free(request->request_line->http_ver);
+    free(request->request_line);
+    clear_headers(request->headers, request->num_headers);
+    free(request->body);
+    free(request);
+}
