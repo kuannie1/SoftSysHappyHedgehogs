@@ -20,4 +20,4 @@ server.o: common.h request.h response.h server.c
 	gcc -c server.c
 
 clean:
-	rm server server.o request.o response.o codes.o date.o
+	rm server server.o request.o response.o headers.o codes.o date.o
