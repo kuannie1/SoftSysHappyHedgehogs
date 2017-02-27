@@ -24,9 +24,9 @@ void read_socket_until_stopper(int socket, char stopper, char *buffer) {
     for (i = 0; i<LINE_BUFFER_SIZE; i++) {
         char char_buffer;
         recv(socket, &char_buffer, 1, 0);
-        if (char_buffer == stopper) {
+        if (char_buffer == stopper || char_buffer == '\r') {
             buffer[i] = '\0';
-            if (stopper == '\r') {
+            if (char_buffer == '\r') {
                 // Read the next \n too to get rid of it
                 recv(socket, &char_buffer, 1, 0);
             }
@@ -58,27 +58,23 @@ RequestLine *build_request_line_from_socket(int socket)
     return requestLine;
 }
 
-/* Calls recv() char-by-char until it hits a \r\n, then puts that string
- * into the buffer.
+/* Builds and returns a MessageHeader struct from the source string.
+ *
+ * str: source string in the format "name: value"
  */
-void get_line_from_socket(int socket, char *buffer)
+MessageHeader *build_header_from_string(char *str)
 {
-    read_socket_until_stopper(socket, '\r', buffer);
-}
+    char *copy = malloc(sizeof(char) * strlen(str));
+    char *name;
+    char *val;
 
-/* Assume the socket is currently at a header line. Builds and returns a
- * MessageHeader struct with the name and value of the current line.
- */
-MessageHeader *build_header_from_socket(int socket)
-{
-    int i;
-    char nameBuffer[LINE_BUFFER_SIZE];
-    char valBuffer[LINE_BUFFER_SIZE];
+    strcpy(copy, str);
+    name = strtok(copy, ":");
+    val = strtok(NULL, "");
 
-    read_socket_until_stopper(socket, ':', nameBuffer);
-    read_socket_until_stopper(socket, '\r', valBuffer);
-
-    return build_header(nameBuffer, valBuffer);
+    // Get rid of leading space
+    val = val + 1;
+    return build_header(name, val);
 }
 
 /* Builds and returns a Request struct from reading a request from the socket
@@ -94,7 +90,14 @@ Request *build_request_from_socket(int socket)
     *req = (Request) {requestLine, headers, 0, body};
 
     //Loop through each header line, add to struct as we go
-    add_header_to_request(req, build_header_from_socket(socket));
+    for (;;) {
+        char lineBuffer[LINE_BUFFER_SIZE];
+        read_socket_until_stopper(socket, '\r', lineBuffer);
+
+        // If buffer is empty, we're done with headers
+        if (!lineBuffer[0]) break;
+        add_header_to_request(req, build_header_from_string(lineBuffer));
+    }
 
     return req;
 }
