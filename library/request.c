@@ -1,9 +1,19 @@
+/* Basic HTTP server library
+ * Collection of methods to read in and manipulate Request structs.
+ * Created February 2017 by Sam Myers, Serena Chen, Anne Ku, and Bill Wong
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "request.h"
 
 /* Converts a string to a request_type enum
+ *
+ * str: String that contains the request type, such as HEAD, POST, GET, PUT,
+ *                    DELETE, OPTIONS, CONNECT
+ *
+ * returns: request_type enum that represents the string
  */
 request_type request_type_string_to_enum(const char *str)
 {
@@ -46,8 +56,14 @@ void flush_socket(int socket)
 }
 
 /* Reads the socket char-by-char to the buffer until it hits the stopper
- * character.  Returns 1 if read sucessfully or 0 if request was too large
- * or another recv error occurred.
+ * character or an end of line.
+ *
+ * socket: socket file descriptor to read
+ * stopper: stopper character
+ * buffer: String to pack
+ *
+ * returns: 1 if read sucessfully, 0 if request was too large or another
+ *          recv error occurred.
  */
 int read_socket_until_stopper(int socket, char stopper, char *buffer, int length)
 {
@@ -93,8 +109,12 @@ int read_socket_until_stopper(int socket, char stopper, char *buffer, int length
 }
 
 /* Assumes that the socket is currently at the request line. Builds a RequestLine
- * struct by reading from the socket word-by-word.  Returns 1 if successful and 0
- * if there's an error reading the socket.
+ * struct by reading from the socket word-by-word.
+ *
+ * socket: socket file descriptor to read
+ * request_line: pointer to RequestLine struct to modify
+ *
+ * returns: 1 if successful, 0 if there's an error reading the socket.
  */
 int build_request_line_from_socket(int socket, RequestLine *request_line)
 {
@@ -120,6 +140,8 @@ int build_request_line_from_socket(int socket, RequestLine *request_line)
 /* Builds and returns a MessageHeader struct from the source string.
  *
  * str: source string in the format "name: value"
+ *
+ * returns: the MessageHeader that the string represents
  */
 MessageHeader *build_header_from_string(char *str)
 {
@@ -137,7 +159,11 @@ MessageHeader *build_header_from_string(char *str)
 }
 
 /* Builds a Request struct from reading a request from the socket.
- * Returns 1 if successful or 0 if request could not be parsed.
+ *
+ * socket: socket file descriptor to read
+ * req: Request struct to modify
+ *
+ * returns: 1 if successful, 0 if request could not be parsed
  */
 int build_request_from_socket(int socket, Request *req)
 {
@@ -169,6 +195,10 @@ int build_request_from_socket(int socket, Request *req)
     return 1;
 }
 
+/* de-allocates all the memory allocated in the struct
+ *
+ * request: Request struct to destroy
+ */
 void clear_request(Request *request)
 {
     free(request->request_line->url);

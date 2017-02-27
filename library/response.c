@@ -1,3 +1,8 @@
+/* Basic HTTP server library
+ * Collection of methods to build and manipulate Response structs.
+ * Created February 2017 by Sam Myers, Serena Chen, Anne Ku, and Bill Wong
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <regex.h>
@@ -6,6 +11,14 @@
 #include "codes.h"
 #include "date.h"
 
+/* Given a status code and message, this will build a Response struct, filling
+ * in the headers, status message, and HTTP version.
+ *
+ * status_code: One of 100, 200, 204, 400, 404, 405, 500
+ * body: pointer to a string message/webpage to deliver to the client
+ *
+ * Returns: A Response struct that represents the HTTP response
+ */
 Response *build_response(int status_code, char *body)
 {
     char *reason_phrase = malloc(REASON_BUFFER_SIZE * sizeof(char));
@@ -36,6 +49,11 @@ Response *build_response(int status_code, char *body)
     return response;
 }
 
+/* Frees all the malloc'd memory of a response. Should be used only after the
+ * message to send is written to the socket.
+ *
+ * response: the Response to de-allocate.
+ */
 void clear_response(Response *response)
 {
     free(response->status_line->reason_phrase);
@@ -44,6 +62,12 @@ void clear_response(Response *response)
     free(response);
 }
 
+/* Takes the Response struct and turns it into a string that can be written to
+ * the socket.
+ *
+ * res: pointer to the Response struct with the data to write
+ * output_buffer: String to pack the response into
+ */
 void response_struct_to_str(Response *res, char *output_buffer)
 {
     int i;
