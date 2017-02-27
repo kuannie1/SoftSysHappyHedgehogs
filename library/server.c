@@ -1,4 +1,5 @@
 /* Basic HTTP server library
+ * Main file that the client will interact with; starts the server.
  * Created February 2017 by Sam Myers, Serena Chen, Anne Ku, and Bill Wong
  */
 

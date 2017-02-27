@@ -1,3 +1,8 @@
+/* Basic HTTP server library
+ * Example application with 2 endpoints.
+ * Created February 2017 by Sam Myers, Serena Chen, Anne Ku, and Bill Wong
+ */
+
 #include "library/server.h"
 
 #define QUEUE_SIZE 10

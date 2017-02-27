@@ -1,9 +1,19 @@
+/* Basic HTTP server library
+ * Collection of methods to read in and manipulate Request structs.
+ * Created February 2017 by Sam Myers, Serena Chen, Anne Ku, and Bill Wong
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "request.h"
 
 /* Converts a string to a request_type enum
+ *
+ * str: String that contains the request type, such as HEAD, POST, GET, PUT,
+ *                    DELETE, OPTIONS, CONNECT
+ *
+ * returns: request_type enum that represents the string
  */
 request_type request_type_string_to_enum(const char *str)
 {
@@ -17,7 +27,11 @@ request_type request_type_string_to_enum(const char *str)
 }
 
 /* Reads the socket char-by-char to the buffer until it hits the stopper
- * character
+ * character or an end of line
+ *
+ * socket: socket file descriptor to read
+ * stopper: stopper character
+ * buffer: String to pack
  */
 void read_socket_until_stopper(int socket, char stopper, char *buffer) {
     int i;
@@ -59,6 +73,10 @@ void read_socket_until_stopper(int socket, char stopper, char *buffer) {
 
 /* Assumes that the socket is currently at the request line. Builds a RequestLine
  * struct by reading from the socket word-by-word.
+ *
+ * socket: socket file descriptor to read
+ *
+ * returns: a pointer to the RequestLine struct generated
  */
 RequestLine *build_request_line_from_socket(int socket)
 {
@@ -82,6 +100,8 @@ RequestLine *build_request_line_from_socket(int socket)
 /* Builds and returns a MessageHeader struct from the source string.
  *
  * str: source string in the format "name: value"
+ *
+ * returns: the MessageHeader that the string represents
  */
 MessageHeader *build_header_from_string(char *str)
 {
@@ -99,6 +119,10 @@ MessageHeader *build_header_from_string(char *str)
 }
 
 /* Builds and returns a Request struct from reading a request from the socket
+ *
+ * socket: socket file descriptor to read
+ *
+ * returns: a pointer to the Request struct that was read in
  */
 Request *build_request_from_socket(int socket)
 {
@@ -126,6 +150,10 @@ Request *build_request_from_socket(int socket)
     return req;
 }
 
+/* de-allocates all the memory allocated in the struct
+ *
+ * request: Request struct to destroy
+ */
 void clear_request(Request *request)
 {
     free(request->request_line->url);
