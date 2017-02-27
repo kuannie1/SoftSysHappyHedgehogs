@@ -14,14 +14,14 @@ typedef enum {
 const static struct {
     request_type val;
     const char *str;
-} conversion [] = {
-    {HEAD, "HEAD"},
-    {POST, "POST"},
-    {GET, "GET"},
-    {PUT, "PUT"},
-    {DELETE, "DELETE"},
-    {OPTIONS, "OPTIONS"},
-    {CONNECT, "CONNECT"}
+} conversion[] = {
+    { HEAD, "HEAD" },
+    { POST, "POST" },
+    { GET, "GET" },
+    { PUT, "PUT" },
+    { DELETE, "DELETE" },
+    { OPTIONS, "OPTIONS" },
+    { CONNECT, "CONNECT" }
 };
 
 #endif

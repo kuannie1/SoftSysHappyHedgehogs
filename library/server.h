@@ -11,10 +11,15 @@
 typedef Response * (*func_ptr)(Request *);
 
 typedef struct {
+    char *path;
+    request_type method;
+} Endpoint;
+
+typedef struct {
     unsigned short port;
     size_t queue_size;
-    char **endpoints;
-    func_ptr *methods;
+    Endpoint **endpoints;
+    func_ptr *functions;
     int num_endpoints;
 } Application;
 
@@ -24,7 +29,8 @@ typedef struct {
 } ProcessRequestArg;
 
 Application *create_application(unsigned short port, size_t queue_size);
-void register_endpoint(Application *app, const char *path, func_ptr *method);
+void register_endpoint(Application *app, const char *path, request_type method,
+                       func_ptr function);
 void start_server(Application *app);
 
 #endif
