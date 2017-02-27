@@ -77,7 +77,7 @@ and other portions in each request/response gets stored in arrays for easy
 accessing. Because we couldn't dynamically make arrays of varying sizes, we
 allocated <!-- some amount --> of memory to store fields for each request.
 
-
+![Diagram](IMG_20170227_174544.jpg)
 <!-- Our diagram here -->
 
 # Results
