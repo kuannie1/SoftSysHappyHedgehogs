@@ -41,21 +41,23 @@ void read_socket_until_stopper(int socket, char stopper, char *buffer) {
  */
 RequestLine *build_request_line_from_socket(int socket)
 {
-    RequestLine *requestLine = malloc(sizeof(RequestLine));
-    char typeBuffer[MAX_REQ_TYPE_SIZE];
-    char urlBuffer[LINE_BUFFER_SIZE];
-    char versionBuffer[MAX_VERSION_SIZE];
+    RequestLine *request_line = malloc(sizeof(RequestLine));
+    char type_buffer[MAX_REQ_TYPE_SIZE];
+    char *url_buffer = malloc(LINE_BUFFER_SIZE * sizeof(char));
+    char *version_buffer = malloc(MAX_VERSION_SIZE * sizeof(char));
 
-    read_socket_until_stopper(socket, ' ', typeBuffer);
-    requestLine->req_type = request_type_string_to_enum(typeBuffer);
+    read_socket_until_stopper(socket, ' ', type_buffer);
+    printf("%s\n", type_buffer);
+    request_line->req_type = request_type_string_to_enum(type_buffer);
 
-    read_socket_until_stopper(socket, ' ', urlBuffer);
-    requestLine->url = urlBuffer;
+    read_socket_until_stopper(socket, ' ', url_buffer);
+    printf("%s\n", url_buffer);
+    request_line->url = url_buffer;
 
-    read_socket_until_stopper(socket, '\r', versionBuffer);
-    requestLine->http_ver = versionBuffer;
+    read_socket_until_stopper(socket, '\r', version_buffer);
+    request_line->http_ver = version_buffer;
 
-    return requestLine;
+    return request_line;
 }
 
 /* Builds and returns a MessageHeader struct from the source string.
@@ -84,19 +86,19 @@ Request *build_request_from_socket(int socket)
     Request *req = malloc(sizeof(Request));
     char *body;
 
-    RequestLine *requestLine = build_request_line_from_socket(socket);
+    RequestLine *request_line = build_request_line_from_socket(socket);
     MessageHeader **headers = create_headers();
 
-    *req = (Request) {requestLine, headers, 0, body};
+    *req = (Request) { request_line, headers, 0, body };
 
     //Loop through each header line, add to struct as we go
     for (;;) {
-        char lineBuffer[LINE_BUFFER_SIZE];
-        read_socket_until_stopper(socket, '\r', lineBuffer);
+        char line_buffer[LINE_BUFFER_SIZE];
+        read_socket_until_stopper(socket, '\r', line_buffer);
 
         // If buffer is empty, we're done with headers
-        if (!lineBuffer[0]) break;
-        add_header_to_request(req, build_header_from_string(lineBuffer));
+        if (!line_buffer[0]) break;
+        add_header_to_request(req, build_header_from_string(line_buffer));
     }
 
     return req;

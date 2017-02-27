@@ -31,7 +31,7 @@ void exit_with_error(const char *message)
  *
  * return: the file descriptor of the server socket.
  */
-int setup(u_short port, size_t queue_size)
+int setup(unsigned short port, size_t queue_size)
 {
     int socket_fd = 0;
     struct sockaddr_in address = { 0 };
@@ -62,7 +62,7 @@ int setup(u_short port, size_t queue_size)
 void *process_request(void *arg)
 {
     int socket = ((ProcessRequestArg *) arg)->client_socket;
-    Application *context = ((ProcessRequestArg *) arg)->application;
+    Application *context = ((ProcessRequestArg *) arg)->context;
 
     char input_buffer[BUFFER_SIZE];
     char output_buffer[BUFFER_SIZE];
@@ -71,25 +71,27 @@ void *process_request(void *arg)
     // Retreive the request from the client socket
     Request *request = build_request_from_socket(socket);
 
-    func_ptr *method;
+    printf("%s %i\r\n", request->request_line->url, request->request_line->req_type);
+
+    func_ptr method;
     Response *response;
     if (get_method(context, request->request_line->url, &method) != 0) {
         // No match to this path, return a 404
         response = build_response(404, "<h1>404 Not Found</h1>");
     } else {
         // Process the request
-        response = endpoint_method(request);
+        response = method(request);
     }
     response_struct_to_str(response, output_buffer);
 
     // Send back a response
     send(socket, output_buffer, BUFFER_SIZE, 0);
 
-    clear_response(res);
-    close(request_arg->client_socket);
+    clear_response(response);
+    close(socket);
 }
 
-Application *create_application(u_short port, size_t queue_size)
+Application *create_application(unsigned short port, size_t queue_size)
 {
     char **endpoints = malloc(MAX_ENDPTS * MAX_ENDPT_LEN * sizeof(char));
     func_ptr *methods = malloc(MAX_ENDPTS * sizeof(func_ptr *));
