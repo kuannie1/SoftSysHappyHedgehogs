@@ -24,7 +24,7 @@ const char *phrases[NUM_CODES] = {
 
 int get_reason_phrase(int status_code, char *phrase)
 {
-    int i = -1;
+    size_t i = 0;
     while (i < NUM_CODES && status_code != codes[i]) i++;
 
     if (i >= NUM_CODES) {

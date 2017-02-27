@@ -13,14 +13,7 @@
 #include <string.h>
 #include "request.h"
 #include "response.h"
-
-#define QUEUE_SIZE 10
-#define PORT 8080
-
-typedef struct {
-    int client_socket;
-    Response * (*server_logic) (char *input_buffer);
-} ProcessRequestArg;
+#include "server.h"
 
 /* Log an error and exit the program.
  *
@@ -38,7 +31,7 @@ void exit_with_error(const char *message)
  *
  * return: the file descriptor of the server socket.
  */
-int setup(u_short *port)
+int setup(unsigned short port, size_t queue_size)
 {
     int socket_fd = 0;
     struct sockaddr_in address = { 0 };
@@ -50,13 +43,13 @@ int setup(u_short *port)
         exit_with_error("Error creating socket.");
     }
     address.sin_family = AF_INET;
-    address.sin_port = htons(*port);
+    address.sin_port = htons(port);
     address.sin_addr.s_addr = htonl(INADDR_ANY);
 
     if (bind(socket_fd, (struct sockaddr *) &address, sizeof(address)) < 0) {
         exit_with_error("Error binding to socket.");
     }
-    if (listen(socket_fd, QUEUE_SIZE) < 0) {
+    if (listen(socket_fd, queue_size) < 0) {
         exit_with_error("Error listening on socket.");
     }
     return socket_fd;
@@ -68,26 +61,66 @@ int setup(u_short *port)
  */
 void *process_request(void *arg)
 {
-    ProcessRequestArg *request_arg = (ProcessRequestArg *) arg;
+    int socket = ((ProcessRequestArg *) arg)->client_socket;
+    Application *context = ((ProcessRequestArg *) arg)->context;
 
     char input_buffer[BUFFER_SIZE];
     char output_buffer[BUFFER_SIZE];
     memset(&output_buffer, 0, BUFFER_SIZE);
 
-    // Retreive the message from the client socket and load into the input buffer
-    Request *req = build_request_from_socket(request_arg->client_socket);
+    // Retreive the request from the client socket
+    Request *request = build_request_from_socket(socket);
 
-    // Process the request
-    Response *res = (request_arg->server_logic)(input_buffer);
-    response_struct_to_str(res, output_buffer);
+    printf("%s %i\r\n", request->request_line->url, request->request_line->req_type);
+
+    func_ptr method;
+    Response *response;
+    if (get_method(context, request->request_line->url, &method) != 0) {
+        // No match to this path, return a 404
+        response = build_response(404, "<h1>404 Not Found</h1>");
+    } else {
+        // Process the request
+        response = method(request);
+    }
+    response_struct_to_str(response, output_buffer);
 
     // Send back a response
-    send(request_arg->client_socket, output_buffer, BUFFER_SIZE, 0);
-    send(request_arg->client_socket, "\n", 1, 0);
+    send(socket, output_buffer, BUFFER_SIZE, 0);
 
-    clear_response(res);
+    clear_response(response);
+    close(socket);
+}
 
-    close(request_arg->client_socket);
+Application *create_application(unsigned short port, size_t queue_size)
+{
+    char **endpoints = malloc(MAX_ENDPTS * MAX_ENDPT_LEN * sizeof(char));
+    func_ptr *methods = malloc(MAX_ENDPTS * sizeof(func_ptr *));
+
+    Application *app = malloc(sizeof(Application));
+    *app = (Application) { port, queue_size, endpoints, methods, 0 };
+
+    return app;
+}
+
+void register_endpoint(Application *app, const char *path, func_ptr *method)
+{
+    app->endpoints[app->num_endpoints] = path;
+    app->methods[app->num_endpoints] = method;
+    app->num_endpoints++;
+}
+
+int get_method(Application *app, const char *path, func_ptr **method)
+{
+    size_t i = 0;
+    while (i < app->num_endpoints && strcasecmp(path, app->endpoints[i]))
+        i++;
+
+    if (i >= app->num_endpoints) {
+        return -1;
+    } else {
+        *method = app->methods[i];
+        return 0;
+    }
 }
 
 /*
@@ -95,23 +128,20 @@ void *process_request(void *arg)
  * socket and runs continuously, taking in clients that connect and using the
  * passed in server_logic function to process the clients' requests.
  *
- * server_logic: function supplied by user for server logic. Server logic
- *          functions should take in an input string and pack an output buffer.
  * Errors may occur is things happen.
  */
-void start_server(Response * (*server_logic)(char *))
+void start_server(Application *app)
 {
     int server_socket = -1;
     int client_socket = -1;
-    u_short port = PORT;
 
     struct sockaddr_in client_address;
     int address_len = sizeof(client_address);
 
     pthread_t new_thread;
 
-    server_socket = setup(&port);
-    printf("HTTP Server running on port %d\n", port);
+    server_socket = setup(app->port, app->queue_size);
+    printf("HTTP Server running on port %d\n", app->port);
 
     // Main program loop; accepts and handles connections from the queue
     while (true) {
@@ -120,47 +150,10 @@ void start_server(Response * (*server_logic)(char *))
             exit_with_error("Error accepting connection.");
         }
 
-        ProcessRequestArg arg = { client_socket, server_logic };
+        ProcessRequestArg arg = { client_socket, app };
 
         if (pthread_create(&new_thread, NULL, process_request, &arg) != 0) {
             perror("Error creating thread.");
         }
     }
-}
-
-/*
- * Shifts all ascii characters of the input string by one, and writes to the output buffer
- *
- * input_buffer: input string
- *
- * return: pointer to Response struct with the cipher as the body
- */
-Response *caesar_cipher(char *input_buffer)
-{
-    int i;
-    printf(input_buffer);
-    char caesar[sizeof(input_buffer)];
-    for (i=0; i<sizeof(input_buffer); i++) {
-        caesar[i] = input_buffer[i] + 1;
-    }
-    Response *res = build_response(200, caesar);
-    return res;
-}
-
-/* Writes a super basic 200 response with an HTML page to the buffer.
- *
- * input_buffer: input string
- *
- * return: pointer to Response struct with "Sup" as the body
- */
-Response *write_html_page(char *input_buffer)
-{
-    Response *res = build_response(200, "<body>Sup</body>\r\n");
-    return res;
-}
-
-int main(void)
-{
-    start_server(write_html_page);
-    return 0;
 }
