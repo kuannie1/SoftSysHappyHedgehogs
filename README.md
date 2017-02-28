@@ -101,7 +101,9 @@ We created an example application to demonstrate our library and how to use it.
 	$ ./example
 ```
 2. Then, type this in your browser of choice and press enter.
- localhost:8080
+```
+localhost:8080 
+```
 
 3. You should get this webpage as a result
 ![webpage](screenshot.jpg)
