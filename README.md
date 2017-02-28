@@ -96,7 +96,9 @@ We created an example application to demonstrate our library and how to use it.
 
 1. Change to the SoftSysHappyHedgehogs directory and run these commands:
 	$ git clone https://github.com/kuannie1/SoftSysHappyHedgehogs.git
+	
 	$ cd SoftSysHappyHedgehogs
+	
 	$ make
 
 2. Then, type this in your browser of choice and press enter.
