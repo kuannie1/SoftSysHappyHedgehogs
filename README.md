@@ -92,21 +92,31 @@ lot of helper methods for `MessageHeader` structs and the `headers` field in the
 `Request` and `Response` structs, including constructors and destructors.
 
 # Results
-We created an example application to demonstrate our library and how to use it.
+We created an example application to demonstrate our library and how to use it. The following code is the minumum required to set up a basic webapp that runs on localhost:
+```
+#include "library/server.h"
 
-1. Change to the SoftSysHappyHedgehogs directory and run these commands:
-```
-	$ make
-	
-	$ ./example
-```
-2. Then, type this in your browser of choice and press enter.
-```
-localhost:8080 
-```
+#define QUEUE_SIZE 10
+#define PORT 8080
 
-3. You should get this webpage as a result
-![webpage](screenshot.jpg)
+Response *hello_world(Request *request)
+{
+    return build_response(200, "<body>Hello World!</body>\r\n");
+}
+
+int main()
+{
+    Application *app = create_application(PORT, QUEUE_SIZE);
+    register_endpoint(app, "/", GET, hello_world);
+    start_server(app);
+    return 0;
+}
+```
+Our API is relatively straightforward. The following functions are intended for developer usage:
+ - `build_response`: returns a pointer to an allocated Response with the desired status code and body.
+ - `create_application`: initializes and returns an Application struct.
+ - `register_endpoint`: registers a function to be used as an endpoint. The function should statelessly take a Request pointer and return a pointer to a Response created with `build_response`.
+ - `start_server`: sets up a socket for the app and starts listening for connections.
 
 <!-- Add images, screenshots, and videos here -->
 
