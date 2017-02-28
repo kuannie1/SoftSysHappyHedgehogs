@@ -108,30 +108,32 @@ void *process_request(void *arg)
 
     char input_buffer[BUFFER_SIZE];
     char output_buffer[BUFFER_SIZE];
-    memset(&output_buffer, 0, BUFFER_SIZE); //clear buffer
+    memset(&output_buffer, 0, BUFFER_SIZE);
+    Response *response;
 
     // Retreive the request from the client socket
-    Request *request = build_request_from_socket(socket);
-    char *url = request->request_line->url;
-    request_type method = request->request_line->req_type;
+    Request *request = malloc(sizeof(Request));
+    if (!build_request_from_socket(socket, request)) {
+        response = build_response(400, "<h1>400 Bad Request</h1>\r\n");
+    } else {
+        char *url = request->request_line->url;
+        request_type method = request->request_line->req_type;
 
-    printf("%s %i\r\n\r\n", url, method);
-
-    func_ptr endpoint_function;
-    Response *response;
-    switch (get_function(context, url, method, &endpoint_function)) {
-        case -1:
-            // No match to this path, return a 404
-            response = build_response(404, "<h1>404 Not Found</h1>\r\n");
-            break;
-        case -2:
-            // Matching path but not matching HTTP method
-            response = build_response(405, "<h1>Method Not Allowed</h1>\r\n");
-            break;
-        case 0:
-            // Process the request
-            response = endpoint_function(request);
-            break;
+        func_ptr endpoint_function;
+        switch (get_function(context, url, method, &endpoint_function)) {
+            case -1:
+                // No match to this path, return a 404
+                response = build_response(404, "<h1>404 Not Found</h1>\r\n");
+                break;
+            case -2:
+                // Matching path but not matching HTTP method
+                response = build_response(405, "<h1>Method Not Allowed</h1>\r\n");
+                break;
+            case 0:
+                // Process the request
+                response = endpoint_function(request);
+                break;
+        }
     }
     response_struct_to_str(response, output_buffer);
 

@@ -24,12 +24,16 @@ to help us with starting our own server.
 
 ### Getting Started (Installation Instructions)
 	$ git clone https://github.com/kuannie1/SoftSysHappyHedgehogs.git
-	$ make ___ (instructions for compiling all the server files)
+	$ cd SoftSysHappyHedgehogs
+	$ make
 
 ### Usage
-To use this library, include `server.h` and `structs.h` at the top of your file.
-To start the server, call `start_server()` with the function that encapsulates
-all the server logic as the parameter.
+To use this library, include `server.h` at the top of your file. 
+Then call `Application *app = create_application(PORT, QUEUE_SIZE);`, where
+`PORT` and `QUEUE_SIZE` are, respectively, the port number and the number
+of connection to handle at once. Then, map functions to endpoints using the
+`register_endpoint` function. To start the server, call `start_server()` 
+with the Application you have just created.
 
 ### License
 Copyright 2017 Anne Ku, Samuel Myers, Serena Chen, and William Wong
