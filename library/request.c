@@ -29,6 +29,8 @@ request_type request_type_string_to_enum(const char *str)
 
 /* Reads all the remaining data on the socket to clear it. Does not store it
  * anywhere.
+ *
+ * socket: socket file descriptor to read from
  */
 void flush_socket(int socket)
 {
