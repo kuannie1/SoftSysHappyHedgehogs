@@ -30,22 +30,23 @@ to help us with starting our own server. -->
 
 For programs on different machines to talk to each other, we need some machines
 to behave as servers and some machines to behave as clients. To make sure this
-connection is warranted, these machines need to follow a set of rules, or protocols
-before they start to communicate. For this project, we use the Hypertext Transfer
-Protocol (HTTP) to handle the server-client traffic and an abstracted
-version of the Transfer Control Protocol for the sockets to prepare a request to
-the server.
+connection is warranted, these machines need to follow a set of rules, or
+protocols before they start to communicate. For this project, we use the
+Hypertext Transfer Protocol (HTTP) to handle the server-client traffic and an
+abstracted version of the Transfer Control Protocol (TCP) for the sockets to
+prepare a request to the server.
 
 ## Sockets
 
-Since I/O file reading is not suitable for talking in the web, we need sockets, a
-type of data stream. To connect to these sockets, however, we need to bind to the
-server's port. This port will be a number that we can use to access the active
-server. After making sure the port number works, then we make a system call called
-listen() to see if the connection is warranted. After accepting the listen() system
-call, the server waits until the client contacts the server again. This last step is
-done under the accept() system call, which returns a second socket descriptor to
-hold a proper server connection.
+TCP is a very common protocol for talking transferring data on the internet. TCP
+involves specifying a port number and an IP address and binding to the sockets
+attached to that port number and IP. Much of this is already implemented for us
+in the sockets C library; however, we still need to specify a port and use the
+socket to communicate. To communicate through the sockets, we first make a
+system call called `listen()` to see if the connection is warranted. After
+accepting the `listen()` system call, the server waits until the client contacts
+the server again. This last step is done under the `accept()` system call, which
+returns a second socket descriptor to hold a proper server connection.
 
 ## Clients and Servers
 
@@ -65,8 +66,8 @@ In order to make this a library that a user could interface with, we had to be
 able to insert the desired server logic in the standardized library methods. We
 were initially imagining something where the user could call a function to start
 the server, and then the server would somehow interrupt or prompt the user's
-application when there was new data to process. However, after using pthreads,
-we found out that it was possible to pass functions as parameters. Using that,
+application when there was new data to process. However, after using `pthreads`,
+we found out that it was possible to store functions as variables. Using that,
 we were able to only require that the user's application pass in a function with
 the right inputs and outputs when starting the server.
 
@@ -75,12 +76,23 @@ incoming HTTP request strings one character. This incremental parsing helps us
 account for special characters such as '\r\n' and ':'. The headers, messages,
 and other portions in each request/response gets stored in arrays for easy
 accessing. Because we couldn't dynamically make arrays of varying sizes, we
-allocated <!-- some amount --> of memory to store fields for each request.
+allocated a large amount of memory to store fields for each request.
 
 ![Diagram](system.jpg)
 <!-- Our diagram here -->
+Above is a high level diagram of our system, in a procedural manner. The above
+photo also contains descriptions of each file. In general, `server.c` is the
+main file; that's where the server starts, the socket connections are opened,
+and the data is transferred from structs to the user's server functions and back
+to structs. The files `response.c` and `request.c` have constructors and
+destructors for their corresponding structs, as well as the ability to, in the
+case of requests, generate a `Request` struct from the socket, or for responses,
+generate an HTTP reponse from a `Response` struct. The file `headers.c` has a
+lot of helper methods for `MessageHeader` structs and the `headers` field in the
+`Request` and `Response` structs, including constructors and destructors.
 
 # Results
+We created an example application to demonstrate our library and how to use it.
 <!-- Add images, screenshots, and videos here -->
 
 <!-- ## Content we need to cover:
