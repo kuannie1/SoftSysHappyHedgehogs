@@ -106,7 +106,7 @@ We created an example application to demonstrate our library and how to use it.
  localhost:8080
 
 3. You should get this webpage as a result
-[webpage](screenshot.jpg)
+![webpage](screenshot.jpg)
 
 <!-- Add images, screenshots, and videos here -->
 
