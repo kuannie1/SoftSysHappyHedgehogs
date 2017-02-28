@@ -1,7 +1,7 @@
 VPATH = ./library
 
 example: example.o server.o request.o response.o headers.o codes.o date.o
-	gcc -pthread example.o server.o request.o response.o headers.o codes.o date.o -o example
+	gcc -pthread -Wall example.o server.o request.o response.o headers.o codes.o date.o -o example
 
 request.o: common.h request.h headers.h request.c
 	gcc -c library/request.c

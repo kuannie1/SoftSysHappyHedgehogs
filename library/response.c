@@ -36,7 +36,7 @@ Response *build_response(int status_code, char *body)
     add_header_to_response(response, date);
 
     char length_str[7];
-    sprintf(length_str, "%i", strlen(body));
+    sprintf(length_str, "%zu", strlen(body));
     MessageHeader *length = build_header("Content-Length", length_str);
     add_header_to_response(response, length);
 
@@ -87,5 +87,5 @@ void response_struct_to_str(Response *res, char *output_buffer)
                                             all_headers_str,
                                             res->body);
 
-    printf(output_buffer);
+    printf("%s", output_buffer);
 }

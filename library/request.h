@@ -18,6 +18,6 @@ typedef struct _request {
 } Request;
 
 Request *build_request_from_socket(int socket);
-void free_request(Request *request);
+void clear_request(Request *request);
 
 #endif

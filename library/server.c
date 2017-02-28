@@ -56,6 +56,47 @@ int setup(unsigned short port, size_t queue_size)
     return socket_fd;
 }
 
+/* Finds the registered endpoint function for a given path and method.
+ *
+ * app: a pointer to the Application struct.
+ * path: the URI to match.
+ * method: the HTTP method to match.
+ * function: a memory address to assign the matched function pointer to.
+ *
+ * returns: an int indicating the success of this operation.
+ *          nonzero return value indicates that the endpoint does not exist.
+ */
+int get_function(Application *app, const char *path, request_type method,
+                 func_ptr *function)
+{
+    size_t i = 0;
+    bool path_found = false;
+    bool method_found = false;
+
+    while (i < app->num_endpoints && !(path_found && method_found)) {
+        if (strcasecmp(path, app->endpoints[i]->path) == 0) {
+            path_found = true;
+
+            if (app->endpoints[i]->method == method) {
+                method_found = true;
+                continue;
+            }
+        }
+        i++;
+    }
+
+    if (i >= app->num_endpoints) {
+        if (path_found) {
+            return -2;
+        } else {
+            return -1;
+        }
+    } else {
+        *function = app->functions[i];
+        return 0;
+    }
+}
+
 /* Handles an HTTP request, then closes the connection.
  *
  * arg: a pointer to a ProcessRequestArg with information about how to handle the request
@@ -132,52 +173,15 @@ void register_endpoint(Application *app, const char *path, request_type method,
                        func_ptr function)
 {
     Endpoint *endpoint = malloc(sizeof(Endpoint));
-    *endpoint = (Endpoint) { path, method };
+
+    char *path_copy = malloc(sizeof(path));
+    strcpy(path_copy, path); //get around the constant string
+    endpoint->path = path_copy;
+    endpoint->method = method;
 
     app->endpoints[app->num_endpoints] = endpoint;
     app->functions[app->num_endpoints] = function;
     app->num_endpoints++;
-}
-
-/* Finds the registered endpoint function for a given path and method.
- *
- * app: a pointer to the Application struct.
- * path: the URI to match.
- * method: the HTTP method to match.
- * function: a memory address to assign the matched function pointer to.
- *
- * returns: an int indicating the success of this operation.
- *          nonzero return value indicates that the endpoint does not exist.
- */
-int get_function(Application *app, const char *path, request_type method,
-                 func_ptr *function)
-{
-    size_t i = 0;
-    bool path_found = false;
-    bool method_found = false;
-
-    while (i < app->num_endpoints && !(path_found && method_found)) {
-        if (strcasecmp(path, app->endpoints[i]->path) == 0) {
-            path_found = true;
-
-            if (app->endpoints[i]->method == method) {
-                method_found = true;
-                continue;
-            }
-        }
-        i++;
-    }
-
-    if (i >= app->num_endpoints) {
-        if (path_found) {
-            return -2;
-        } else {
-            return -1;
-        }
-    } else {
-        *function = app->functions[i];
-        return 0;
-    }
 }
 
 /*

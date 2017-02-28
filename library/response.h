@@ -19,5 +19,6 @@ typedef struct _response {
 
 Response *build_response(int status_code, char *body);
 void clear_response(Response *response);
+void response_struct_to_str(Response *res, char *output_buffer);
 
 #endif
