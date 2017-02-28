@@ -26,14 +26,47 @@ request_type request_type_string_to_enum(const char *str)
     printf("ERROR: No such request type: %s\n", str);
 }
 
+/* Reads all the remaining data on the socket to clear it. Does not store it
+ * anywhere.
+ */
+void flush_socket(int socket)
+{
+    fd_set set;
+    struct timeval tv;
+
+    // Set timeout to .01 seconds
+    tv.tv_sec = 0;
+    tv.tv_usec = 10000;
+
+    // Add socket to to file descriptor set
+    FD_SET(socket, &set);
+
+    // Read infinitely until the socket has no more info or recv gives an error
+    for (;;) {
+        char buffer[BUFFER_SIZE];
+        if (select(socket+1, &set, NULL, NULL, &tv) < 1) {
+            // Socket has no more information
+            return;
+        }
+        if (recv(socket, buffer, BUFFER_SIZE, 0) < 1) {
+            // recv gave an error
+            return;
+        }
+    }
+}
+
 /* Reads the socket char-by-char to the buffer until it hits the stopper
- * character or an end of line
+ * character or an end of line.
  *
  * socket: socket file descriptor to read
  * stopper: stopper character
  * buffer: String to pack
+ *
+ * returns: 1 if read sucessfully, 0 if request was too large or another
+ *          recv error occurred.
  */
-void read_socket_until_stopper(int socket, char stopper, char *buffer) {
+int read_socket_until_stopper(int socket, char stopper, char *buffer, int length)
+{
     int i;
     fd_set set;
     struct timeval tv;
@@ -45,56 +78,63 @@ void read_socket_until_stopper(int socket, char stopper, char *buffer) {
     // Add socket to to file descriptor set
     FD_SET(socket, &set);
 
-    for (i = 0; i<BUFFER_SIZE; i++) {
-        char char_buffer;
+    for (i = 0; i<length; i++) {
+        char *char_buffer = malloc(sizeof(char));
 
-        if (select(socket+1, &set, NULL, NULL, &tv) < 1){
+        if (select(socket+1, &set, NULL, NULL, &tv) < 1) {
             // Socket has no more information
             buffer[i] = '\0';
-            return;
+            return 1;
         }
-        if (recv(socket, &char_buffer, 1, 0) < 1) {
+        if (recv(socket, char_buffer, 1, 0) < 1) {
             // recv gave an error
             buffer[i] = '\0';
-            return;
+            return 0;
         }
-        if (char_buffer == stopper || char_buffer == '\r') {
+        if (*char_buffer == stopper || *char_buffer == '\r') {
             // We've reached the stopper char or the end of the line
             buffer[i] = '\0';
-            if (char_buffer == '\r') {
+            if (*char_buffer == '\r') {
                 // Read the next \n too to get rid of it
-                recv(socket, &char_buffer, 1, 0);
+                recv(socket, char_buffer, 1, 0);
             }
-            return;
+            return 1;
         }
-        buffer[i] = char_buffer;
+        buffer[i] = *char_buffer;
     }
+    // We reached the end of the buffer length before we hit any stop conditions
+    buffer[length] = '\0';
+    flush_socket(socket);
+    return 0;
 }
 
 /* Assumes that the socket is currently at the request line. Builds a RequestLine
  * struct by reading from the socket word-by-word.
  *
  * socket: socket file descriptor to read
+ * request_line: pointer to RequestLine struct to modify
  *
- * returns: a pointer to the RequestLine struct generated
+ * returns: 1 if successful, 0 if there's an error reading the socket.
  */
-RequestLine *build_request_line_from_socket(int socket)
+int build_request_line_from_socket(int socket, RequestLine *request_line)
 {
-    RequestLine *request_line = malloc(sizeof(RequestLine));
     char type_buffer[MAX_REQ_TYPE_SIZE];
     char *url_buffer = malloc(LINE_BUFFER_SIZE * sizeof(char));
     char *version_buffer = malloc(MAX_VERSION_SIZE * sizeof(char));
 
-    read_socket_until_stopper(socket, ' ', type_buffer);
+    if (!read_socket_until_stopper(socket, ' ', type_buffer, MAX_REQ_TYPE_SIZE))
+        return 0;
     request_line->req_type = request_type_string_to_enum(type_buffer);
 
-    read_socket_until_stopper(socket, ' ', url_buffer);
+    if (!read_socket_until_stopper(socket, ' ', url_buffer, LINE_BUFFER_SIZE))
+        return 0;
     request_line->url = url_buffer;
 
-    read_socket_until_stopper(socket, '\r', version_buffer);
+    if (!read_socket_until_stopper(socket, '\r', version_buffer, MAX_VERSION_SIZE))
+        return 0;
     request_line->http_ver = version_buffer;
 
-    return request_line;
+    return 1;
 }
 
 /* Builds and returns a MessageHeader struct from the source string.
@@ -118,26 +158,30 @@ MessageHeader *build_header_from_string(char *str)
     return build_header(name, val);
 }
 
-/* Builds and returns a Request struct from reading a request from the socket
+/* Builds a Request struct from reading a request from the socket.
  *
  * socket: socket file descriptor to read
+ * req: Request struct to modify
  *
- * returns: a pointer to the Request struct that was read in
+ * returns: 1 if successful, 0 if request could not be parsed
  */
-Request *build_request_from_socket(int socket)
+int build_request_from_socket(int socket, Request *req)
 {
-    Request *req = malloc(sizeof(Request));
+    // Request *req = malloc(sizeof(Request));
     char *body = malloc(sizeof(char) * BUFFER_SIZE);
     MessageHeader **headers = create_headers();
+    RequestLine *request_line = malloc(sizeof(RequestLine));
 
-    RequestLine *request_line = build_request_line_from_socket(socket);
+    if (!build_request_line_from_socket(socket, request_line))
+        return 0;
 
     *req = (Request) { request_line, headers, 0, body };
 
     //Loop through each header line, add to struct as we go
     for (;;) {
         char line_buffer[LINE_BUFFER_SIZE];
-        read_socket_until_stopper(socket, '\r', line_buffer);
+        if (!read_socket_until_stopper(socket, '\r', line_buffer, LINE_BUFFER_SIZE))
+            return 0;
 
         // If buffer is empty, we're done with headers
         if (!line_buffer[0]) break;
@@ -145,9 +189,10 @@ Request *build_request_from_socket(int socket)
     }
 
     // The rest of the socket is the body
-    read_socket_until_stopper(socket, '\r', body);
+    if (!read_socket_until_stopper(socket, '\r', body, BUFFER_SIZE))
+        return 0;
 
-    return req;
+    return 1;
 }
 
 /* de-allocates all the memory allocated in the struct
