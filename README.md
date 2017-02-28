@@ -95,11 +95,11 @@ lot of helper methods for `MessageHeader` structs and the `headers` field in the
 We created an example application to demonstrate our library and how to use it.
 
 1. Change to the SoftSysHappyHedgehogs directory and run these commands:
-`
+```
 	$ make
 	
 	$ ./example
-`
+```
 2. Then, type this in your browser of choice and press enter.
  localhost:8080
 
