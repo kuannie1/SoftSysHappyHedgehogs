@@ -118,6 +118,8 @@ Our API is relatively straightforward. The following functions are intended for 
  - `register_endpoint`: registers a function to be used as an endpoint. The function should statelessly take a Request pointer and return a pointer to a Response created with `build_response`.
  - `start_server`: sets up a socket for the app and starts listening for connections.
 
+![Diagram](screenshot.jpg)
+Above is the output of the above code.
 <!-- Add images, screenshots, and videos here -->
 
 <!-- ## Content we need to cover:
