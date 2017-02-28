@@ -93,6 +93,18 @@ lot of helper methods for `MessageHeader` structs and the `headers` field in the
 
 # Results
 We created an example application to demonstrate our library and how to use it.
+
+1. Change to the SoftSysHappyHedgehogs directory and run these commands:
+	$ git clone https://github.com/kuannie1/SoftSysHappyHedgehogs.git
+	$ cd SoftSysHappyHedgehogs
+	$ make
+
+2. Then, type this in your browser of choice and press enter.
+ localhost:8080
+
+3. You should get this webpage as a result
+[webpage](screenshot.jpg)
+
 <!-- Add images, screenshots, and videos here -->
 
 <!-- ## Content we need to cover:
